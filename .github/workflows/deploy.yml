@@ -1,0 +1,99 @@
+name: Entur/Helm/Deploy
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: "The image to deploy, on the form app:tag"
+        required: true
+        type: string
+      environment:
+        description: "The target environment"
+        required: true
+        type: string
+      release_name:
+        description: "The release name, defaults to repository name"
+        type: string
+        default: "repo_name"
+      namespace:
+        description: "The namespace to use, defaults to repository name"
+        type: string
+        default: "repo_name"
+      cloud_provider:
+        description: "Which repository to use. GCP/Azure"
+        type: string
+        default: "GCP"
+      timeout_minutes:
+        description: "Time out after x minutes"
+        default: 10
+
+jobs:
+  helm-deploy:
+    name: Helm deploy
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: set-env
+        shell: bash
+        run: |
+          echo "GHA_HELM_DEPLOY_IMAGE=${{ inputs.image }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_CLOUD_PROVIDER=${{ inputs.cloud_provider }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_RELEASE_NAME=${{ inputs.release_name }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_NAMESPACE=${{ inputs.namespace }}" >> $GITHUB_ENV
+      - id: set-release-name
+        shell: bash
+        if: env.GHA_HELM_DEPLOY_RELEASE_NAME == 'repo_name'
+        run: |
+          echo "GHA_HELM_DEPLOY_RELEASE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+      - id: set-namespace
+        shell: bash
+        if: env.GHA_HELM_DEPLOY_NAMESPACE == 'repo_name'
+        run: |
+          echo "GHA_HELM_DEPLOY_NAMESPACE =${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+      - id: verify-cloud-provider
+        shell: bash
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'GCP' && env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'Azure'
+        run: |
+          echo "cloud_provider can only be GCP or Azure"
+          exit 1
+      - uses: actions/checkout@v4.1.2
+      - id: login-gcp
+        uses: google-github-actions/auth@v2.1.2
+        if: inputs.cloud_provider == 'GCP'
+        with:
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.SERVICE_ACCOUNT }}
+          token_format: "access_token"
+      - id: login-azure
+        uses: Azure/login@v2
+        if: inputs.cloud_provider == 'Azure'
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - id: get-credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          # TODO: how do we do this?
+          project_id: ${{ secrets[format('{0}_CLUSTER_PROJECT_ID', inputs.environment)] }}
+          cluster_name: ${{ secrets[format('{0}_CLUSTER_NAME', inputs.environment)] }}
+          location: ${{ secrets[format('{0}_CLUSTER_LOCATION', inputs.environment)] }}
+      - id: install
+        uses: azure/setup-helm@v4
+        #with:
+        # version: v3.12.3
+      - id: deploy-given-tag
+        shell: bash
+        run: |
+          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} helm/${{ env.GHA_HELM_DEPLOY_NAMESPACE }}/ \
+            -f helm/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}/env/values-${{ inputs.environment }}.yaml \
+            --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
+            --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
+            --atomic
+          kubectl -n ${{ inputs.namespace }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          kubectl -n ${{ inputs.namespace }} get services -o wide
