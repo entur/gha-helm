@@ -25,6 +25,7 @@ on:
         default: "GCP"
       timeout_minutes:
         description: "Time out after x minutes"
+        type: number
         default: 10
 
 jobs:
@@ -79,10 +80,9 @@ jobs:
       - id: get-credentials
         uses: google-github-actions/get-gke-credentials@v1
         with:
-          # TODO: how do we do this?
-          project_id: ${{ secrets[format('{0}_CLUSTER_PROJECT_ID', inputs.environment)] }}
-          cluster_name: ${{ secrets[format('{0}_CLUSTER_NAME', inputs.environment)] }}
-          location: ${{ secrets[format('{0}_CLUSTER_LOCATION', inputs.environment)] }}
+          project_id: "ent-kub-${{inputs.environment}}" # TODO: fix jp
+          cluster_name: "kub-ent-${{inputs.environment}}-001" # TODO: fix jp
+          location: "europe-west1" # TODO: fix jp
       - id: install
         uses: azure/setup-helm@v4
         #with:
@@ -95,5 +95,5 @@ jobs:
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
             --atomic
-          kubectl -n ${{ inputs.namespace }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
-          kubectl -n ${{ inputs.namespace }} get services -o wide
+          kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} get services -o wide
