@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./helm/${{ env.GHA_HELM_DEPLOY_CHART_NAME}}/ \
-            -f helm/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}/env/values-${{ inputs.environment }}.yaml \
+            -f helm/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}/env/values-kub-ent-${{ inputs.environment }}.yaml \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
             --atomic
