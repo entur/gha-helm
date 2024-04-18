@@ -104,6 +104,7 @@ jobs:
             -f helm/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}/env/values-kub-ent-${{ inputs.environment }}.yaml \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
+            --install \
             --atomic
           kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
           kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} get services -o wide
