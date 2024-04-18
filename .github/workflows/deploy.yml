@@ -11,6 +11,10 @@ on:
         description: "The target environment"
         required: true
         type: string
+      chart_name:
+        description: "The chart name, defaults to repository name"
+        type: string
+        default: "repo_name"
       release_name:
         description: "The release name, defaults to repository name"
         type: string
@@ -45,12 +49,18 @@ jobs:
           echo "GHA_HELM_DEPLOY_IMAGE=${{ inputs.image }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_CLOUD_PROVIDER=${{ inputs.cloud_provider }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_RELEASE_NAME=${{ inputs.release_name }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_CHART_NAME=${{ inputs.chart_name}}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_NAMESPACE=${{ inputs.namespace }}" >> $GITHUB_ENV
       - id: set-release-name
         shell: bash
         if: env.GHA_HELM_DEPLOY_RELEASE_NAME == 'repo_name'
         run: |
           echo "GHA_HELM_DEPLOY_RELEASE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+      - id: set-chart-name
+        shell: bash
+        if: env.GHA_HELM_DEPLOY_CHART_NAME == 'repo_name'
+        run: |
+          echo "GHA_HELM_DEPLOY_CHART_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: set-namespace
         shell: bash
         if: env.GHA_HELM_DEPLOY_NAMESPACE == 'repo_name'
@@ -90,7 +100,7 @@ jobs:
       - id: deploy-given-tag
         shell: bash
         run: |
-          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} helm/${{ env.GHA_HELM_DEPLOY_NAMESPACE }}/ \
+          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./helm/${{ env.GHA_HELM_DEPLOY_CHART_NAME}}/ \
             -f helm/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}/env/values-${{ inputs.environment }}.yaml \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
