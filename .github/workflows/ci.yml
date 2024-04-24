@@ -16,7 +16,11 @@ jobs:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
 
-  test-lint-ok:
+  test-lint-ok-dev:
     uses: ./.github/workflows/lint.yml
+    strategy:
+      matrix:
+        environment: [dev, tst, prd]
     with:
+      environment: ${{ matrix.environment }}
       chart: fixture/helm/amazing-app
