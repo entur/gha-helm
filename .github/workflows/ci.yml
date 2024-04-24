@@ -1,0 +1,22 @@
+name: Entur/Helm/CI
+
+on:
+  pull_request:
+
+jobs:
+  update-lint-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md
+
+  update-build-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    with:
+      workflow_file: .github/workflows/deploy.yml
+      readme_file: README-deploy.md
+
+  test-lint-ok:
+    uses: ./.github/workflows/lint.yml
+    with:
+      chart: fixture/helm/amazing-app

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: simpe-app
+version: 0.0.1
+dependencies:
+  - name: common
+    version: 1.18.4
+    repository: "https://entur.github.io/helm-charts"
