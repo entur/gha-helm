@@ -46,6 +46,7 @@ jobs:
         if: env.GHA_HELM_LINT_VALUES_FILE == 'values-kub-ent'
         run: |
           echo "GHA_HELM_LINT_VALUES_FILE=values-kub-ent-${{ inputs.environment }}.yaml" >> $GITHUB_ENV
+      - uses: actions/checkout@v4.1.2
       - id: install
         uses: azure/setup-helm@v4
       - id: lint
