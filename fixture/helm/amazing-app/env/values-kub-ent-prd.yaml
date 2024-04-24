@@ -1,7 +1,7 @@
 common:
   env: prd
   ingress:
-    host: simple-app.entur.io
+    host: amazing-app.entur.io
   container:
     replicas: 2
     maxReplicas: 10

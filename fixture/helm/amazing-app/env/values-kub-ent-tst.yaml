@@ -1,7 +1,7 @@
 common:
   env: tst
   ingress:
-    host: simple-app.staging.entur.io
+    host: amazing-app.staging.entur.io
   configmap:
     enabled: true
     data:

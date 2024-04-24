@@ -1,6 +1,6 @@
 common:
-  app: simple-app
-  shortname: simapp
+  app: amazing-app
+  shortname: amazeapp
   team: example
   ingress:
     trafficType: public
