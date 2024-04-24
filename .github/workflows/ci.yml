@@ -60,13 +60,13 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
-  cleanup-deploy-azure:
-    needs: [test-deploy-ok-azure]
-    runs-on: ubuntu-latest
-    environment: az-dev
-    steps:
-      # - id: login-azure
-      # - id: get-credentials
-      # - id: clean
-      #   run: |
-      #     helm uninstall amazing-app
+  # cleanup-deploy-azure:
+  #   needs: [test-deploy-ok-azure]
+  #   runs-on: ubuntu-latest
+  #   environment: az-dev
+  #   steps:
+  # - id: login-azure
+  # - id: get-credentials
+  # - id: clean
+  #   run: |
+  #     helm uninstall amazing-app
