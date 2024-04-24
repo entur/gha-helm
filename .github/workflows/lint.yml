@@ -34,7 +34,7 @@ jobs:
       - id: set-env
         shell: bash
         run: |
-          echo "GHA_HELM_LINT_CHART=${{ inputs.chart_name}}" >> $GITHUB_ENV
+          echo "GHA_HELM_LINT_CHART=${{ inputs.chart}}" >> $GITHUB_ENV
           echo "GHA_HELM_LINT_VALUES_FILE=${{ inputs.values_file}}" >> $GITHUB_ENV
       - id: set-chart-name
         shell: bash
