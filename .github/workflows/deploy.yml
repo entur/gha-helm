@@ -15,7 +15,7 @@ on:
         description: "The chart, defaults to `helm/$repository_name`"
         type: string
         default: "repo_name"
-      values_file:
+      values:
         description: "The values file in `./helm/$app/env/`, default `values-kub-ent-$environment.yaml`"
         type: string
         default: "values-kub-ent"
@@ -54,7 +54,7 @@ jobs:
           echo "GHA_HELM_DEPLOY_CLOUD_PROVIDER=${{ inputs.cloud_provider }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_RELEASE_NAME=${{ inputs.release_name }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_CHART=${{ inputs.chart }}" >> $GITHUB_ENV
-          echo "GHA_HELM_DEPLOY_VALUES_FILE=${{ inputs.values_file }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_VALUES=${{ inputs.values }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_NAMESPACE=${{ inputs.namespace }}" >> $GITHUB_ENV
       - id: set-release-name
         shell: bash
@@ -68,9 +68,9 @@ jobs:
           echo "GHA_HELM_DEPLOY_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: set-values-file
         shell: bash
-        if: env.GHA_HELM_DEPLOY_VALUES_FILE == 'values-kub-ent'
+        if: env.GHA_HELM_DEPLOY_VALUES == 'values-kub-ent'
         run: |
-          echo "GHA_HELM_DEPLOY_VALUES_FILE=values-kub-ent-${{ inputs.environment }}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_VALUES=values-kub-ent-${{ inputs.environment }}.yaml" >> $GITHUB_ENV
       - id: set-namespace
         shell: bash
         if: env.GHA_HELM_DEPLOY_NAMESPACE == 'repo_name'
@@ -84,12 +84,19 @@ jobs:
           exit 1
       - uses: actions/checkout@v4.1.2
       - id: login-gcp
-        uses: google-github-actions/auth@v2.1.2
         if: inputs.cloud_provider == 'GCP'
+        uses: google-github-actions/auth@v2.1.2
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
           token_format: "access_token"
+      - id: get-credentials-gcp
+        if: inputs.cloud_provider == 'GCP'
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          project_id: "ent-kub-${{inputs.environment}}" # TODO: fix jp
+          cluster_name: "kub-ent-${{inputs.environment}}-001" # TODO: fix jp
+          location: "europe-west1" # TODO: fix jp
       - id: login-azure
         uses: Azure/login@v2
         if: inputs.cloud_provider == 'Azure'
@@ -97,12 +104,9 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      - id: get-credentials
-        uses: google-github-actions/get-gke-credentials@v1
-        with:
-          project_id: "ent-kub-${{inputs.environment}}" # TODO: fix jp
-          cluster_name: "kub-ent-${{inputs.environment}}-001" # TODO: fix jp
-          location: "europe-west1" # TODO: fix jp
+      # - id: get-credentials-azure
+      #   if: inputs.cloud_provider == 'Azure'
+      #   # TODO: what?
       - id: install
         uses: azure/setup-helm@v4
         #with:
@@ -111,7 +115,7 @@ jobs:
         shell: bash
         run: |
           helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART_NAME }}/ \
-            -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES_FILE }} \
+            -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
             --install \
