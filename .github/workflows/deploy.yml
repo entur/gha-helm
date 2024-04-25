@@ -56,68 +56,75 @@ jobs:
           echo "GHA_HELM_DEPLOY_CHART=${{ inputs.chart }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_VALUES=${{ inputs.values }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_NAMESPACE=${{ inputs.namespace }}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_REGISTRY=eu.gcr.io/entur-system-1287" >> $GITHUB_ENV
       - id: set-release-name
-        shell: bash
         if: env.GHA_HELM_DEPLOY_RELEASE_NAME == 'repo_name'
+        shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_RELEASE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: set-chart-name
-        shell: bash
         if: env.GHA_HELM_DEPLOY_CHART == 'repo_name'
+        shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: set-values-file
-        shell: bash
         if: env.GHA_HELM_DEPLOY_VALUES == 'values-kub-ent'
+        shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_VALUES=values-kub-ent-${{ inputs.environment }}.yaml" >> $GITHUB_ENV
       - id: set-namespace
-        shell: bash
         if: env.GHA_HELM_DEPLOY_NAMESPACE == 'repo_name'
+        shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_NAMESPACE =${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: verify-cloud-provider
-        shell: bash
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'GCP' && env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'Azure'
+        shell: bash
         run: |
           echo "cloud_provider can only be GCP or Azure"
           exit 1
+      - id: set-registry-azure
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
+        shell: bash
+        run: |
+          echo "GHA_HELM_DEPLOY_REGISTRY=eu.gcr.io/entur-system-1287" >> $GITHUB_ENV
       - uses: actions/checkout@v4.1.2
       - id: login-gcp
-        if: inputs.cloud_provider == 'GCP'
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'GCP'
         uses: google-github-actions/auth@v2.1.2
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
           token_format: "access_token"
       - id: get-credentials-gcp
-        if: inputs.cloud_provider == 'GCP'
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'GCP'
         uses: google-github-actions/get-gke-credentials@v1
         with:
           project_id: "ent-kub-${{inputs.environment}}" # TODO: fix jp
           cluster_name: "kub-ent-${{inputs.environment}}-001" # TODO: fix jp
           location: "europe-west1" # TODO: fix jp
       - id: login-azure
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
         uses: Azure/login@v2
-        if: inputs.cloud_provider == 'Azure'
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      # - id: get-credentials-azure
-      #   if: inputs.cloud_provider == 'Azure'
-      #   # TODO: what?
+      - id: set-context-azure
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
       - id: install
         uses: azure/setup-helm@v4
-        #with:
-        # version: v3.12.3
       - id: deploy-given-tag
         shell: bash
         run: |
           helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART_NAME }}/ \
             -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
-            --set common.container.image=eu.gcr.io/entur-system-1287/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
+            --set common.container.image=${{ env.GHA_HELM_DEPLOY_REGISTRY }}/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
             --install \
             --atomic
           kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
