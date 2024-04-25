@@ -130,7 +130,7 @@ jobs:
       - id: deploy-given-tag
         shell: bash
         run: |
-          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART_NAME }}/ \
+          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART }}/ \
             -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
             --set common.container.image=${{ env.GHA_HELM_DEPLOY_REGISTRY }}/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
