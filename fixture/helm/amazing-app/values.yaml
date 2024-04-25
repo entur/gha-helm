@@ -5,4 +5,5 @@ common:
   ingress:
     trafficType: public
   container:
+    uid: 101 # getting started needs uid 101 because nginx
     image: <+artifacts.primary.image>
