@@ -110,6 +110,11 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - id: kubelogin-azure
+        if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: "latest"
       - id: set-context-azure
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
         uses: azure/aks-set-context@v3
