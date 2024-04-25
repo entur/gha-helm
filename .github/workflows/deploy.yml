@@ -113,6 +113,8 @@ jobs:
       - id: kubelogin-azure
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'Azure'
         uses: azure/use-kubelogin@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           kubelogin-version: "latest"
       - id: set-context-azure

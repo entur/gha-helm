@@ -27,7 +27,7 @@ jobs:
   test-deploy-ok-gcp:
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: env
+      environment: dev
       image: getting-started:test-helm-deploy
       chart: fixture/helm/amazing-app
       release_name: amazing-app
@@ -47,8 +47,8 @@ jobs:
       - id: get-credentials
         uses: google-github-actions/get-gke-credentials@v1
         with:
-          project_id: "ent-kub-${{matrix.environment}}"
-          cluster_name: "kub-ent-${{matrix.environment}}-001"
+          project_id: "ent-kub-dev"
+          cluster_name: "kub-ent-dev-001"
           location: "europe-west1"
       - id: clean
         run: |
