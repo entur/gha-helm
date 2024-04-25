@@ -82,6 +82,12 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - id: kubelogin-azure
+        uses: azure/use-kubelogin@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          kubelogin-version: "latest"
       - id: set-context-azure
         uses: azure/aks-set-context@v3
         with:
