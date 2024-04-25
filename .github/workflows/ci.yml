@@ -16,7 +16,7 @@ jobs:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
 
-  test-lint-ok-dev:
+  test-lint-ok-gcp:
     uses: ./.github/workflows/lint.yml
     strategy:
       matrix:
@@ -24,6 +24,13 @@ jobs:
     with:
       environment: ${{ matrix.environment }}
       chart: fixture/helm/amazing-app
+
+  test-lint-ok-azure:
+    uses: ./.github/workflows/lint.yml
+    with:
+      environment: az-dev
+      chart: fixture/helm/amazing-app-az
+
   test-deploy-ok-gcp:
     uses: ./.github/workflows/deploy.yml
     with:
@@ -57,6 +64,7 @@ jobs:
       - id: clean
         run: |
           helm uninstall amazing-app -n gha-ci
+
   test-deploy-ok-azure:
     uses: ./.github/workflows/deploy.yml
     with:
