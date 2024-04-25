@@ -89,6 +89,8 @@ jobs:
         run: |
           echo "GHA_HELM_DEPLOY_REGISTRY=acrentur001.azurecr.io/entur" >> $GITHUB_ENV
       - uses: actions/checkout@v4.1.2
+      - id: install
+        uses: azure/setup-helm@v4
       - id: login-gcp
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'GCP'
         uses: google-github-actions/auth@v2.1.2
@@ -125,8 +127,6 @@ jobs:
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
           admin: false
           use-kubelogin: true
-      - id: install
-        uses: azure/setup-helm@v4
       - id: deploy-given-tag
         shell: bash
         run: |
