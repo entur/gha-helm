@@ -37,6 +37,10 @@ jobs:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-latest
     environment: dev
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
     steps:
       - id: login-gcp
         uses: google-github-actions/auth@v2.1.2
@@ -67,6 +71,10 @@ jobs:
     needs: [test-deploy-ok-azure]
     runs-on: ubuntu-latest
     environment: az-dev
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
     steps:
       - id: login-azure
         uses: Azure/login@v2
