@@ -61,6 +61,7 @@ jobs:
       image: getting-started:test-helm-deploy
       chart: fixture/helm/amazing-app
       release_name: amazing-app
+      values: fixture/helm/amazing-app/env/dev.yaml
       namespace: ghaci
     secrets: inherit
   cleanup-deploy-azure:
