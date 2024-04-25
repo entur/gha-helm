@@ -56,7 +56,7 @@ jobs:
           location: "europe-west1"
       - id: clean
         run: |
-          helm uninstall amazing-app
+          helm uninstall amazing-app -n gha-ci
   test-deploy-ok-azure:
     uses: ./.github/workflows/deploy.yml
     with:
@@ -89,4 +89,4 @@ jobs:
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
       - id: clean
         run: |
-          helm uninstall amazing-app
+          helm uninstall amazing-app -n ghaci
