@@ -32,6 +32,7 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
+    secrets: inherit
   cleanup-deploy-gcp:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-latest
@@ -61,6 +62,7 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
+    secrets: inherit
   cleanup-deploy-azure:
     needs: [test-deploy-ok-azure]
     runs-on: ubuntu-latest
