@@ -18,7 +18,7 @@ on:
       values:
         description: "The values file in `./helm/$app/env/`, default `$environment.yaml`"
         type: string
-        default: "values-kub-ent"
+        default: "values"
       release_name:
         description: "The release name, defaults to repository name"
         type: string
@@ -68,7 +68,7 @@ jobs:
         run: |
           echo "GHA_HELM_DEPLOY_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: set-values-file
-        if: env.GHA_HELM_DEPLOY_VALUES == 'values-kub-ent'
+        if: env.GHA_HELM_DEPLOY_VALUES == 'values'
         shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_VALUES=${{ inputs.environment }}.yaml" >> $GITHUB_ENV

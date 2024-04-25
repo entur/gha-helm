@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amazing-app
+  namespace: ghaci
+  labels:
+    app: amazing-app
+    team: plattform
+    env: {{ .Values.env }}
+spec:
+  selector:
+    matchLabels:
+      app: amazing-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: amazing-app
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: amazing-app
+          image: {{ .Values.common.container.image }}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 5
+          readinessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
