@@ -130,6 +130,7 @@ jobs:
       - id: deploy-given-tag
         shell: bash
         run: |
+          helm dependency build ./${{ env.GHA_HELM_DEPLOY_CHART }}
           helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART }}/ \
             -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
             --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
