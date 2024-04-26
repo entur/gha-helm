@@ -97,7 +97,6 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
-          token_format: "access_token"
       - id: get-credentials-gcp
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'GCP'
         uses: google-github-actions/get-gke-credentials@v1
