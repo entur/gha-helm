@@ -30,6 +30,9 @@ jobs:
 
   test-deploy-ok-gcp:
     uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     with:
       environment: dev
       image: getting-started:test-helm-deploy.20240418-SHAd860147
@@ -64,6 +67,9 @@ jobs:
 
   test-deploy-ok-azure:
     uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     with:
       environment: az-dev
       cloud_provider: Azure
