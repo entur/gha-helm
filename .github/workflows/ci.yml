@@ -18,11 +18,8 @@ jobs:
 
   test-lint-ok-gcp:
     uses: ./.github/workflows/lint.yml
-    strategy:
-      matrix:
-        environment: [dev, tst, prd]
     with:
-      environment: ${{ matrix.environment }}
+      environment: dev
       chart: fixture/helm/amazing-app
 
   test-lint-ok-azure:

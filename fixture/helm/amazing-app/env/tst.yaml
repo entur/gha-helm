@@ -1,8 +1,0 @@
-common:
-  env: tst
-  ingress:
-    host: amazing-app.staging.entur.io
-  configmap:
-    enabled: true
-    data:
-      LOG_LEVEL: warn
