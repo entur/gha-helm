@@ -31,7 +31,7 @@ jobs:
   test-deploy-ok-gcp:
     uses: ./.github/workflows/deploy.yml
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.head_ref }}-gcp
       cancel-in-progress: true
     with:
       environment: dev
@@ -68,7 +68,7 @@ jobs:
   test-deploy-ok-azure:
     uses: ./.github/workflows/deploy.yml
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.head_ref }}-azure
       cancel-in-progress: true
     with:
       environment: az-dev
