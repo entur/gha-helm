@@ -128,6 +128,7 @@ jobs:
           admin: false
           use-kubelogin: true
       - id: deploy-given-tag
+        name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         shell: bash
         run: |
           helm dependency build ./${{ env.GHA_HELM_DEPLOY_CHART }}
