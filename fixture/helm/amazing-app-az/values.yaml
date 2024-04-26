@@ -1,0 +1,4 @@
+env: nothing
+common:
+  container:
+    image: override-me

@@ -1,0 +1,58 @@
+name: Entur/Helm/Lint
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "The target environment"
+        required: true
+        type: string
+      chart:
+        description: "The chart, defaults to `helm/$repository_name`"
+        type: string
+        default: "repo_name"
+      values:
+        description: "The values file, default `$environment.yaml`"
+        type: string
+        default: "values-kub-ent"
+      timeout_minutes:
+        description: "Time out after x minutes"
+        type: number
+        default: 10
+
+jobs:
+  helm-deploy:
+    name: Helm deploy
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: set-env
+        shell: bash
+        run: |
+          echo "GHA_HELM_LINT_CHART=${{ inputs.chart }}" >> $GITHUB_ENV
+          echo "GHA_HELM_LINT_VALUES=${{ inputs.values }}" >> $GITHUB_ENV
+      - id: set-chart-name
+        shell: bash
+        if: env.GHA_HELM_LINT_CHART == 'repo_name'
+        run: |
+          echo "GHA_HELM_LINT_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+      - id: set-values-file
+        shell: bash
+        if: env.GHA_HELM_LINT_VALUES == 'values-kub-ent'
+        run: |
+          echo "GHA_HELM_LINT_VALUES=${{ inputs.environment }}.yaml" >> $GITHUB_ENV
+      - uses: actions/checkout@v4.1.2
+      - id: install
+        uses: azure/setup-helm@v4
+      - id: lint
+        shell: bash
+        run: |
+          helm lint \
+            --quiet \
+            ${{ env.GHA_HELM_LINT_CHART }} \
+            -f ${{ env.GHA_HELM_LINT_CHART }}/env/${{ env.GHA_HELM_LINT_VALUES }}

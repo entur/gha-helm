@@ -1,0 +1,9 @@
+common:
+  app: amazing-app
+  shortname: amazeapp
+  team: example
+  ingress:
+    trafficType: public
+  container:
+    uid: 101 # getting started needs uid 101 because nginx
+    image: override-me

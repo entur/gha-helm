@@ -1,0 +1,113 @@
+name: Entur/Helm/CI
+
+on:
+  pull_request:
+
+jobs:
+  update-lint-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md
+
+  update-build-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    with:
+      workflow_file: .github/workflows/deploy.yml
+      readme_file: README-deploy.md
+
+  test-lint-ok-gcp:
+    uses: ./.github/workflows/lint.yml
+    with:
+      environment: dev
+      chart: fixture/helm/amazing-app
+
+  test-lint-ok-azure:
+    uses: ./.github/workflows/lint.yml
+    with:
+      environment: az-dev
+      chart: fixture/helm/amazing-app-az
+
+  test-deploy-ok-gcp:
+    uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}-gcp
+      cancel-in-progress: true
+    with:
+      environment: dev
+      image: getting-started:test-helm-deploy.20240418-SHAd860147
+      chart: fixture/helm/amazing-app
+      release_name: amazing-app
+      namespace: gha-ci
+    secrets: inherit
+  cleanup-deploy-gcp:
+    needs: [test-deploy-ok-gcp]
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    steps:
+      - id: login-gcp
+        uses: google-github-actions/auth@v2.1.2
+        with:
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.SERVICE_ACCOUNT }}
+          token_format: "access_token"
+      - id: get-credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          project_id: "ent-kub-dev"
+          cluster_name: "kub-ent-dev-001"
+          location: "europe-west1"
+      - id: clean
+        run: |
+          helm uninstall amazing-app -n gha-ci
+
+  test-deploy-ok-azure:
+    uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}-azure
+      cancel-in-progress: true
+    with:
+      environment: az-dev
+      cloud_provider: Azure
+      image: getting-started:test-helm-deploy.20240418-SHAd860147
+      chart: fixture/helm/amazing-app-az
+      release_name: amazing-app
+      namespace: ghaci
+    secrets: inherit
+  cleanup-deploy-azure:
+    needs: [test-deploy-ok-azure]
+    runs-on: ubuntu-latest
+    environment: az-dev
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    steps:
+      - id: install
+        uses: azure/setup-helm@v4
+      - id: login-azure
+        uses: Azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - id: kubelogin-azure
+        uses: azure/use-kubelogin@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          kubelogin-version: "latest"
+      - id: set-context-azure
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
+          admin: false
+          use-kubelogin: true
+      - id: clean
+        run: |
+          helm uninstall amazing-app -n ghaci

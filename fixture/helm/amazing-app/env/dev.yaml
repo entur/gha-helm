@@ -1,0 +1,8 @@
+common:
+  env: dev
+  ingress:
+    host: amazing-app.dev.entur.io
+  configmap:
+    enabled: true
+    data:
+      LOG_LEVEL: warn
