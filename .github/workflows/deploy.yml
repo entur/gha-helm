@@ -76,7 +76,7 @@ jobs:
         if: env.GHA_HELM_DEPLOY_NAMESPACE == 'repo_name'
         shell: bash
         run: |
-          echo "GHA_HELM_DEPLOY_NAMESPACE =${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_NAMESPACE=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - id: verify-cloud-provider
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'GCP' && env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'Azure'
         shell: bash
