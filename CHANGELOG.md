@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/entur/gha-helm/compare/v1.0.0...v1.0.1) (2024-05-06)
+
+
+### Bug Fixes
+
+* lint is named lint ([c74144e](https://github.com/entur/gha-helm/commit/c74144e7262f34c84c431772b424cf265b86051a))
+* lint is named lint ([#4](https://github.com/entur/gha-helm/issues/4)) ([757c33d](https://github.com/entur/gha-helm/commit/757c33d999ba63d90c72bb15f6545a2b2fd705f5))
+
 ## 1.0.0 (2024-04-30)
 
 
