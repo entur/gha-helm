@@ -6,7 +6,6 @@
 ### Features
 
 * lint and deploy v1 ([caf5376](https://github.com/entur/gha-helm/commit/caf5376e722caaff8715d11041258329ca751be5))
-* lint and deploy v1 ([caf5376](https://github.com/entur/gha-helm/commit/caf5376e722caaff8715d11041258329ca751be5))
 * release candidate 1 ([5bd9452](https://github.com/entur/gha-helm/commit/5bd9452550c83e1cdcbd928ac0a0c53c8557f825))
 
 
