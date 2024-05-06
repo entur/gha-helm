@@ -21,8 +21,8 @@ on:
         default: 10
 
 jobs:
-  helm-deploy:
-    name: Helm deploy
+  helm-lint:
+    name: Helm lint
     environment: ${{ inputs.environment }}
     permissions:
       contents: write
