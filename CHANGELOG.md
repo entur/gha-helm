@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.3](https://github.com/entur/gha-helm/compare/v1.0.2...v1.0.3) (2024-05-07)
+
+
+### Bug Fixes
+
+* allo custom project and cluster ([e850d08](https://github.com/entur/gha-helm/commit/e850d08859a70448e6cd88fa1c381fa2391b9036))
+* allo custom project and cluster ([2077332](https://github.com/entur/gha-helm/commit/207733213325e1e120a3de8ec3ed3e0e23e5c40b))
+* allow custom project and cluster ([#8](https://github.com/entur/gha-helm/issues/8)) ([27c6140](https://github.com/entur/gha-helm/commit/27c614017a7d33c8e54e8aa47820263b24cbc368))
+* forward environment ([f4b2652](https://github.com/entur/gha-helm/commit/f4b26524a31dd407883c249e024d949dbc34ab41))
+* pin version ([a6a9fb7](https://github.com/entur/gha-helm/commit/a6a9fb730626b4296e20f21237ec5354050d841d))
+* set github token ([59dcb24](https://github.com/entur/gha-helm/commit/59dcb24366b02209b412b7c5368377438e9edc6e))
+* typo for namespace ([496d077](https://github.com/entur/gha-helm/commit/496d07793e780ebf77ace1c6d072e781c7931226))
+* typo for namespace ([41bb2f6](https://github.com/entur/gha-helm/commit/41bb2f695fc508d027942f56dac2cb297fd5a40a))
+
 ## [1.0.2](https://github.com/entur/gha-helm/compare/v1.0.1...v1.0.2) (2024-05-07)
 
 
