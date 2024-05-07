@@ -137,5 +137,3 @@ jobs:
             --set common.container.image=${{ env.GHA_HELM_DEPLOY_REGISTRY }}/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
             --install \
             --atomic
-          kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} rollout status deployment/${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
-          kubectl -n ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} get services -o wide
