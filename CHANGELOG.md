@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/entur/gha-helm/compare/v1.0.1...v1.0.2) (2024-05-07)
+
+
+### Bug Fixes
+
+* rely on atomic and allow cron deploys ([b40f9dd](https://github.com/entur/gha-helm/commit/b40f9dd2b78239a65d64e87f788a705b547c2c19))
+* rely on atomic and allow cron deploys ([#6](https://github.com/entur/gha-helm/issues/6)) ([58e150b](https://github.com/entur/gha-helm/commit/58e150b0bfc2cbe7b6f4780c357e053d9022c09a))
+
 ## [1.0.1](https://github.com/entur/gha-helm/compare/v1.0.0...v1.0.1) (2024-05-06)
 
 
