@@ -98,8 +98,8 @@ jobs:
         uses: azure/setup-helm@v4
       - uses: entur/gha-meta/.github/actions/cloud-auth@allow-custom-proj-and-cluster
         with:
-          environment: ${{ env.GHA_HELM_DEPLOY_APPLY_ENVIRONMENT }}
-          cloud_provider: ${{ env.GHA_HELM_DEPLOY_APPLY_CLOUD_PROVIDER }}
+          environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
+          cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
           azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
@@ -108,8 +108,8 @@ jobs:
 
       - uses: entur/gha-meta/.github/actions/k8s-auth@allow-custom-proj-and-cluster
         with:
-          environment: ${{ env.GHA_HELM_DEPLOY_APPLY_ENVIRONMENT }}
-          cloud_provider: ${{ env.GHA_HELM_DEPLOY_APPLY_CLOUD_PROVIDER }}
+          environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
+          cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
           project_id: ${{ inputs.project_id }}
           cluster_name: ${{ inputs.cluster_name }}
           azure_cluster_resource_group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
