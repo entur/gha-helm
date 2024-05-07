@@ -55,6 +55,7 @@ jobs:
       - id: set-env
         shell: bash
         run: |
+          echo "GHA_HELM_DEPLOY_ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_IMAGE=${{ inputs.image }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_CLOUD_PROVIDER=${{ inputs.cloud_provider }}" >> $GITHUB_ENV
           echo "GHA_HELM_DEPLOY_RELEASE_NAME=${{ inputs.release_name }}" >> $GITHUB_ENV
