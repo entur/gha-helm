@@ -106,7 +106,6 @@ jobs:
           azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
           azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
           azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
       - uses: entur/gha-meta/.github/actions/k8s-auth@allow-custom-proj-and-cluster
         with:
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
@@ -115,6 +114,7 @@ jobs:
           cluster_name: ${{ inputs.cluster_name }}
           azure_cluster_resource_group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
           azure_cluster_name: ${{ vars.AZURE_CLUSTER_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - id: deploy-given-tag
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         shell: bash
