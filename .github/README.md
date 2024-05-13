@@ -3,7 +3,7 @@
       <br>entur/gha-helm<br>
 </h1>
 
-[![Entur/Terraform/CI](https://github.com/entur/gha-helm/actions/workflows/ci.yml/badge.svg?event=pull_request)](https://github.com/entur/gha-helm/actions/workflows/ci.yml)
+[![Entur/Helm/CI](https://github.com/entur/gha-helm/actions/workflows/ci.yml/badge.svg?event=pull_request)](https://github.com/entur/gha-helm/actions/workflows/ci.yml)
 
 GitHub Actions for working with Helm
 
