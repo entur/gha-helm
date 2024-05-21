@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.4](https://github.com/entur/gha-helm/compare/v1.0.3...v1.0.4) (2024-05-21)
+
+
+### Bug Fixes
+
+* make it possible to skip image replacement ([1bf0743](https://github.com/entur/gha-helm/commit/1bf07433dc0cbac2b53f772ab82ff4b66f5d34c0))
+* make it possible to skip image replacement ([#13](https://github.com/entur/gha-helm/issues/13)) ([881a888](https://github.com/entur/gha-helm/commit/881a88815476e63015bf3c34abc86eac763819df))
+
 ## [1.0.3](https://github.com/entur/gha-helm/compare/v1.0.2...v1.0.3) (2024-05-07)
 
 
