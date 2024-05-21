@@ -29,7 +29,7 @@ jobs:
       id-token: write
       pull-requests: write
     timeout-minutes: ${{ inputs.timeout_minutes }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - id: set-env
         shell: bash
