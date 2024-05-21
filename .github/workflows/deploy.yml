@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       image:
-        description: "The image to deploy, on the form app:tag"
+        description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm configuration."
         required: true
         type: string
       environment:
@@ -120,9 +120,17 @@ jobs:
         shell: bash
         run: |
           helm dependency update ./${{ env.GHA_HELM_DEPLOY_CHART }}
-          helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART }}/ \
-            -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
-            --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
-            --set common.container.image=${{ env.GHA_HELM_DEPLOY_REGISTRY }}/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
-            --install \
-            --atomic
+          if [ "${{ env.GHA_HELM_DEPLOY_IMAGE }}" != "na" ]; then
+            helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART }}/ \
+              -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
+              --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
+              --set common.container.image=${{ env.GHA_HELM_DEPLOY_REGISTRY }}/${{ env.GHA_HELM_DEPLOY_IMAGE }} \
+              --install \
+              --atomic
+          else
+            helm upgrade ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }} ./${{ env.GHA_HELM_DEPLOY_CHART }}/ \
+              -f ${{ env.GHA_HELM_DEPLOY_CHART }}/env/${{ env.GHA_HELM_DEPLOY_VALUES }} \
+              --namespace ${{ env.GHA_HELM_DEPLOY_NAMESPACE }} \
+              --install \
+              --atomic
+          fi
