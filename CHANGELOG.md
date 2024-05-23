@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/entur/gha-helm/compare/v1.0.4...v1.0.5) (2024-05-23)
+
+
+### Bug Fixes
+
+* set timeout ([#15](https://github.com/entur/gha-helm/issues/15)) ([da3caad](https://github.com/entur/gha-helm/commit/da3caad27e76b864d406646d73443bc5553fa860))
+
 ## [1.0.4](https://github.com/entur/gha-helm/compare/v1.0.3...v1.0.4) (2024-05-21)
 
 
