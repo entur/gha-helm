@@ -16,20 +16,20 @@ on:
         type: string
         default: "values-kub-ent"
       timeout_minutes:
-        description: "Time out after x minutes"
+        description: "Job timeout in minutes"
         type: number
-        default: 10
+        default: 3
 
 jobs:
   helm-lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     name: Helm lint
     environment: ${{ inputs.environment }}
     permissions:
       contents: write
       id-token: write
       pull-requests: write
-    timeout-minutes: ${{ inputs.timeout_minutes }}
-    runs-on: ubuntu-24.04
     steps:
       - id: set-env
         shell: bash
