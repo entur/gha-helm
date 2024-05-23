@@ -31,26 +31,26 @@ on:
         description: "Which repository to use. GCP/Azure"
         type: string
         default: "GCP"
-      timeout_minutes:
-        description: "Time out after x minutes"
-        type: number
-        default: 10
       project_id:
         type: string
         description: "Do not use this input"
       cluster_name:
         type: string
         description: "Do not use this input"
+      timeout_minutes:
+        description: "Job timeout in minutes"
+        type: number
+        default: 15
 jobs:
   helm-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     name: Helm deploy
     environment: ${{ inputs.environment }}
     permissions:
       contents: write
       id-token: write
       pull-requests: write
-    timeout-minutes: ${{ inputs.timeout_minutes }}
-    runs-on: ubuntu-24.04
     steps:
       - id: set-env
         shell: bash
