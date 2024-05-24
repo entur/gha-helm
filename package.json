@@ -1,0 +1,12 @@
+{
+  "name": "gha-helm",
+  "version": "1.0.5",
+  "description": "",
+  "main": "na.js",
+  "scripts": {
+    "test": "echo 'Not applicable' && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "EUPL"
+}
