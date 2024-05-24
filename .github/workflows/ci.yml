@@ -5,13 +5,13 @@ on:
 
 jobs:
   update-lint-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.1.2
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
 
   update-build-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.0.0
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.1.2
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
@@ -50,7 +50,7 @@ jobs:
       pull-requests: write
     steps:
       - id: login-gcp
-        uses: google-github-actions/auth@v2.1.2
+        uses: google-github-actions/auth@v2.1.3
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
@@ -102,7 +102,7 @@ jobs:
         with:
           kubelogin-version: "latest"
       - id: set-context-azure
-        uses: azure/aks-set-context@v3
+        uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
