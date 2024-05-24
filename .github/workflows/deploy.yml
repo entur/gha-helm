@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_REGISTRY=acrentur001.azurecr.io/entur" >> $GITHUB_ENV
-      - uses: actions/checkout@v4.1.2
+      - uses: actions/checkout@v4.1.6
       - id: install
         uses: azure/setup-helm@v4
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1.1.2
