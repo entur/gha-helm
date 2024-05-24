@@ -56,7 +56,7 @@ jobs:
           service_account: ${{ vars.SERVICE_ACCOUNT }}
           token_format: "access_token"
       - id: get-credentials
-        uses: google-github-actions/get-gke-credentials@v1
+        uses: google-github-actions/get-gke-credentials@v2
         with:
           project_id: "ent-kub-dev"
           cluster_name: "kub-ent-dev-001"
@@ -102,7 +102,7 @@ jobs:
         with:
           kubelogin-version: "latest"
       - id: set-context-azure
-        uses: azure/aks-set-context@v3
+        uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
