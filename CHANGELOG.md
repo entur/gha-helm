@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/entur/gha-helm/compare/v1.0.5...v1.0.6) (2024-05-24)
+
+
+### Bug Fixes
+
+* remove GH environment from job ([#22](https://github.com/entur/gha-helm/issues/22)) ([0369974](https://github.com/entur/gha-helm/commit/03699747388654116703a41e570d5a6658835047))
+
 ## [1.0.5](https://github.com/entur/gha-helm/compare/v1.0.4...v1.0.5) (2024-05-23)
 
 
