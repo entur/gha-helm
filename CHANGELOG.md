@@ -2,23 +2,11 @@
 
 ## [1.0.6](https://github.com/entur/gha-helm/compare/v1.0.6...v1.0.6) (2024-05-27)
 
-
-### ⚠ BREAKING CHANGES
-
-* cleanup havoc
-
-### Features
-
-* lint and deploy v1 ([caf5376](https://github.com/entur/gha-helm/commit/caf5376e722caaff8715d11041258329ca751be5))
-* lint and deploy v1 ([caf5376](https://github.com/entur/gha-helm/commit/caf5376e722caaff8715d11041258329ca751be5))
-* release candidate 1 ([5bd9452](https://github.com/entur/gha-helm/commit/5bd9452550c83e1cdcbd928ac0a0c53c8557f825))
-
-
 ### Bug Fixes
 
 * add CODEOWNERS ([2fc3c67](https://github.com/entur/gha-helm/commit/2fc3c670daba3fc13f4e5687c7fe775f176b9842))
 * add sections to docs ([b5b419a](https://github.com/entur/gha-helm/commit/b5b419aca4c01cb9b9da3851114d78120c274d26))
-* allo custom project and cluster ([e850d08](https://github.com/entur/gha-helm/commit/e850d08859a70448e6cd88fa1c381fa2391b9036))
+* allow custom project and cluster ([e850d08](https://github.com/entur/gha-helm/commit/e850d08859a70448e6cd88fa1c381fa2391b9036))
 * allo custom project and cluster ([2077332](https://github.com/entur/gha-helm/commit/207733213325e1e120a3de8ec3ed3e0e23e5c40b))
 * allow custom project and cluster ([#8](https://github.com/entur/gha-helm/issues/8)) ([27c6140](https://github.com/entur/gha-helm/commit/27c614017a7d33c8e54e8aa47820263b24cbc368))
 * az chart ([bda03e1](https://github.com/entur/gha-helm/commit/bda03e18b1cb4c2c78fde323fb27c270b9130e9c))
@@ -53,34 +41,6 @@
 * set name for deploy ([14a360d](https://github.com/entur/gha-helm/commit/14a360dae10c8e922671b12e20f29483352badc0))
 * set ns for uninstall ([6191fb1](https://github.com/entur/gha-helm/commit/6191fb162bf58c6a9db7c63c5a0256cb9b31147b))
 * set permissions for cleanup ([18c5bea](https://github.com/entur/gha-helm/commit/18c5bea4c3d1d95990c2ee34e861e63f9836b291))
-* set timeout ([#15](https://github.com/entur/gha-helm/issues/15)) ([da3caad](https://github.com/entur/gha-helm/commit/da3caad27e76b864d406646d73443bc5553fa860))
-* try without token format ([39c7848](https://github.com/entur/gha-helm/commit/39c784856b5a49e91a84dc6da0b00b2c947a05c2))
-* typo for input ([c05d659](https://github.com/entur/gha-helm/commit/c05d659cc3bce50096af1a954478a0227a155077))
-* typo for namespace ([496d077](https://github.com/entur/gha-helm/commit/496d07793e780ebf77ace1c6d072e781c7931226))
-* typo for namespace ([41bb2f6](https://github.com/entur/gha-helm/commit/41bb2f695fc508d027942f56dac2cb297fd5a40a))
-* uid ([b155f37](https://github.com/entur/gha-helm/commit/b155f379b34fbeb2ac996f3f77caea492ee95d65))
-* uncomment crap ([b54cb7d](https://github.com/entur/gha-helm/commit/b54cb7d6fefd460d2486898210d4f898b2b0848e))
-* use concurrency, race cond no fun ([a08a6c2](https://github.com/entur/gha-helm/commit/a08a6c20724b4657a30d32868422359e429ec804))
-* use upgrade install ([bfd937d](https://github.com/entur/gha-helm/commit/bfd937d2122fbcebce3de7e35c6f3a9ff0cd3a54))
-
-
-### Miscellaneous Chores
-
-* **main:** release 1.0.6 ([f9fa820](https://github.com/entur/gha-helm/commit/f9fa820da059c640cecc2870b8b6a2c343a9baef))
-* **main:** release 1.0.6 ([7184ea3](https://github.com/entur/gha-helm/commit/7184ea3310d660e342fe3bab47b1b08efc85576a))
-* **main:** release 1.0.6 ([72f6c18](https://github.com/entur/gha-helm/commit/72f6c1876c9240a1e30a72cfa15f3a470b2fe3e8))
-* **main:** release 1.0.6 ([a5a5135](https://github.com/entur/gha-helm/commit/a5a5135dcaf944206a7671a9ad08ccfe9611abea))
-* **main:** release 1.0.6 ([d85d3ce](https://github.com/entur/gha-helm/commit/d85d3cebbdc7f1216d1c1a4d43d79ce66c201e57))
-* **main:** release 1.0.6 ([ac72f97](https://github.com/entur/gha-helm/commit/ac72f9726b63914621f5fffd71a2452f30289154))
-* **main:** release 1.0.6 ([d729800](https://github.com/entur/gha-helm/commit/d729800ce00b1d2d1035d7da409725598f9fe73c))
-* **main:** release 1.0.6 ([37613de](https://github.com/entur/gha-helm/commit/37613de340a90ef531f5c99c1f0e48eddc98cdcb))
-* **main:** release 1.0.6 ([768a604](https://github.com/entur/gha-helm/commit/768a6043c710f39c4ec299fe93184f42dea21929))
-* **main:** release 1.0.6 ([5da51f4](https://github.com/entur/gha-helm/commit/5da51f425fdb1336907a31480b0f2421888e760c))
-* **main:** release 1.0.6 ([387c1f7](https://github.com/entur/gha-helm/commit/387c1f790083dcd4277cb88f2e099433ab1b7ce7))
-* **main:** release 1.0.6 ([33ca096](https://github.com/entur/gha-helm/commit/33ca0967b9889ffeca0da3ff25d761440c9aaced))
-* **main:** release 1.0.6 ([#27](https://github.com/entur/gha-helm/issues/27)) ([a382a67](https://github.com/entur/gha-helm/commit/a382a671d715ada504fe0f18149b441fb6dee6e3))
-* **main:** release 1.0.6 ([#29](https://github.com/entur/gha-helm/issues/29)) ([7f9e8b6](https://github.com/entur/gha-helm/commit/7f9e8b6ae68bda93e716ee7fe012d3332e5e9cf1))
-* **main:** release 1.0.6 ([#31](https://github.com/entur/gha-helm/issues/31)) ([4461e48](https://github.com/entur/gha-helm/commit/4461e4859a01649759b53a157d5a6771af1fcc85))
 
 ## [1.0.5](https://github.com/entur/gha-helm/compare/v1.0.4...v1.0.5) (2024-05-23)
 
