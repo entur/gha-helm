@@ -14,10 +14,10 @@ on:
 env:
   GHA_HELM_LINT_CHART: ${{ inputs.chart }}
 jobs:
-  helm-lint:
+  helm-unittest:
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ inputs.timeout_minutes }}
-    name: Helm lint
+    name: Helm UnitTest
     permissions:
       contents: read
       id-token: write
