@@ -32,7 +32,7 @@ jobs:
       environment: az-dev
       chart: fixture/helm/amazing-app-az
 
-  test-unittest-ok-gcp:
+  test-unittest-ok:
     uses: ./.github/workflows/unittest.yml
     with:
       chart: fixture/helm/amazing-app-az
