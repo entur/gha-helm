@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/entur/gha-helm/compare/v1.0.6...v1.1.0) (2024-05-28)
+
+
+### Features
+
+* unittest ([f6deab1](https://github.com/entur/gha-helm/commit/f6deab119585d46ebe36b93a225cd72d1de30fd8))
+* unittest ([#36](https://github.com/entur/gha-helm/issues/36)) ([af871d4](https://github.com/entur/gha-helm/commit/af871d494f8ec897379e6bc26bb7cb3ab77eeb8d))
+
 ## [1.0.6](https://github.com/entur/gha-helm/compare/v1.0.6...v1.0.6) (2024-05-27)
 
 ### Bug Fixes
