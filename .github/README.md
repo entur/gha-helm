@@ -42,7 +42,7 @@ jobs:
 ```
 
 ```yaml
-# ci.yml
+# cd.yml
 name: CD
 
 on:
