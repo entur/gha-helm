@@ -5,16 +5,20 @@ on:
 
 jobs:
   update-lint-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.1.6
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
-
   update-build-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.1.6
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
+  update-unittest-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/unittest.yml
+      readme_file: README-unittest.md
 
   test-lint-ok-gcp:
     uses: ./.github/workflows/lint.yml
@@ -26,6 +30,11 @@ jobs:
     uses: ./.github/workflows/lint.yml
     with:
       environment: az-dev
+      chart: fixture/helm/amazing-app-az
+
+  test-unittest-ok-gcp:
+    uses: ./.github/workflows/unittest.yml
+    with:
       chart: fixture/helm/amazing-app-az
 
   test-deploy-ok-gcp:

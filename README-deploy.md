@@ -2,7 +2,7 @@
 
 ## Usage
 
-See [getting-started](https://github.com/entur/getting-started/blob/main/.github/workflows/cd.yml) for a real-world example.
+See [plattform-examples](https://github.com/entur/plattform-examples/blob/main/.github/workflows/cd.yml) for a real-world example.
 
 Add the following step to your workflow configuration:
 

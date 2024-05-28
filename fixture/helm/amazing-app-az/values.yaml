@@ -2,3 +2,5 @@ env: nothing
 common:
   container:
     image: override-me
+releaseName: amazing-app
+namespace: ghaci

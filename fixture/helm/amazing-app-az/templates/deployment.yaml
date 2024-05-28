@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amazing-app
-  namespace: ghaci
+  name: {{ .Values.releaseName }}
+  namespace: {{ .Values.namespace }}
   labels:
-    app: amazing-app
-    team: plattform
-    env: {{ .Values.env }}
+    {{- include "labels" . |trim| nindent 4 }}
+  annotations:
+    {{- include "annotations" . |trim| nindent 4 }}
 spec:
   selector:
     matchLabels:
