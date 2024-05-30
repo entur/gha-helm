@@ -12,7 +12,7 @@ on:
         type: string
         default: "repo_name"
       values:
-        description: "The values file, default `$environment.yaml`"
+        description: "The values file, default `values-kub-ent-$environment.yaml`. Must be in env/ subfolder from chart."
         type: string
         default: "values-kub-ent"
       timeout_minutes:
@@ -29,12 +29,11 @@ jobs:
       contents: write
       id-token: write
       pull-requests: write
+    env:
+      GHA_HELM_LINT_CHART: ${{ inputs.chart }}
+      GHA_HELM_LINT_VALUES: ${{ inputs.values }}
+      GHA_HELM_LINT_ENV: ${{ inputs.environment }}
     steps:
-      - id: set-env
-        shell: bash
-        run: |
-          echo "GHA_HELM_LINT_CHART=${{ inputs.chart }}" >> $GITHUB_ENV
-          echo "GHA_HELM_LINT_VALUES=${{ inputs.values }}" >> $GITHUB_ENV
       - id: set-chart-name
         shell: bash
         if: env.GHA_HELM_LINT_CHART == 'repo_name'
@@ -44,7 +43,7 @@ jobs:
         shell: bash
         if: env.GHA_HELM_LINT_VALUES == 'values-kub-ent'
         run: |
-          echo "GHA_HELM_LINT_VALUES=${{ inputs.environment }}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_LINT_VALUES=values-kub-ent-${GHA_HELM_LINT_ENV}.yaml" >> $GITHUB_ENV
       - uses: actions/checkout@v4.1.6
       - id: install
         uses: azure/setup-helm@v4
@@ -53,5 +52,5 @@ jobs:
         run: |
           helm lint \
             --quiet \
-            ${{ env.GHA_HELM_LINT_CHART }} \
-            -f ${{ env.GHA_HELM_LINT_CHART }}/env/${{ env.GHA_HELM_LINT_VALUES }}
+            "${GHA_HELM_LINT_CHART}" \
+            -f "${GHA_HELM_LINT_CHART}/env/${GHA_HELM_LINT_VALUES}"
