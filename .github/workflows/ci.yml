@@ -4,40 +4,24 @@ on:
   pull_request:
 
 jobs:
-  update-lint-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/lint.yml
-      readme_file: README-lint.md
-  update-build-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/deploy.yml
-      readme_file: README-deploy.md
-  update-unittest-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/unittest.yml
-      readme_file: README-unittest.md
-
   test-lint-ok-gcp:
     uses: ./.github/workflows/lint.yml
     with:
       environment: dev
       chart: fixture/helm/amazing-app
-
+  test-unittest-ok:
+    uses: ./.github/workflows/unittest.yml
+    with:
+      chart: fixture/helm/amazing-app-az
   test-lint-ok-azure:
+    needs: [test-unittest-ok]
     uses: ./.github/workflows/lint.yml
     with:
       environment: az-dev
       chart: fixture/helm/amazing-app-az
 
-  test-unittest-ok:
-    uses: ./.github/workflows/unittest.yml
-    with:
-      chart: fixture/helm/amazing-app-az
-
   test-deploy-ok-gcp:
+    needs: [test-lint-ok-gcp]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
@@ -58,23 +42,23 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
-      - id: login-gcp
-        uses: google-github-actions/auth@v2.1.3
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
+          environment: dev
+          cloud_provider: gcp
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
-          token_format: "access_token"
-      - id: get-credentials
-        uses: google-github-actions/get-gke-credentials@v2
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
         with:
+          environment: dev
+          cloud_provider: gcp
           project_id: "ent-kub-dev"
-          cluster_name: "kub-ent-dev-001"
-          location: "europe-west1"
       - id: clean
         run: |
           helm uninstall amazing-app -n gha-ci
 
   test-deploy-ok-azure:
+    needs: [test-lint-ok-azure]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-azure
@@ -106,8 +90,10 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - id: kubelogin-azure
         uses: azure/use-kubelogin@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          kubelogin-version: "latest"
+          kubelogin-version: "v1.2"
       - id: set-context-azure
         uses: azure/aks-set-context@v4
         with:
@@ -118,3 +104,21 @@ jobs:
       - id: clean
         run: |
           helm uninstall amazing-app -n ghaci
+  update-lint-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md
+  update-build-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/deploy.yml
+      readme_file: README-deploy.md
+  update-unittest-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/unittest.yml
+      readme_file: README-unittest.md
