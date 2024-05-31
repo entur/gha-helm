@@ -108,20 +108,16 @@ jobs:
         name: Set Cluster Name AKS
         shell: bash
         if: inputs.cloud_provider == 'az'
-        env:
-          GHA_HELM_DEPLOY_CLUSTER_NAME: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME  }}
         run: |
-          if [ -z "${GHA_HELM_DEPLOY_CLUSTER_NAME}" ]; then
+          if [ -z "${AZURE_CLUSTER_NAME}" ]; then
             echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
             exit 1
           fi
-          echo "GHA_HELM_DEPLOY_CLUSTER_NAME=${GHA_HELM_DEPLOY_CLUSTER_NAME}" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_CLUSTER_NAME=${AZURE_CLUSTER_NAME}" >> $GITHUB_ENV
       - id: set-clustername-gcp
         name: Set Cluster Name GKE
         shell: bash
         if: inputs.cloud_provider == 'gcp'
-        env:
-          GHA_HELM_DEPLOY_CLUSTER_NAME: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME  }}
         run: |
           if [ -z "${GHA_HELM_DEPLOY_CLUSTER_NAME}" ]; then
             echo "GHA_HELM_DEPLOY_CLUSTER_NAME=kub-ent-${GHA_HELM_DEPLOY_ENVIRONMENT}-001" >> $GITHUB_ENV
