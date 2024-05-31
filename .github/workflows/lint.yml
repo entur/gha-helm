@@ -12,7 +12,7 @@ on:
         type: string
         default: "repo_name"
       values:
-        description: "The values file, default `values-kub-ent-$environment.yaml`. Must be in env/ subfolder from chart."
+        description: "The values file, default `$environment.yaml`. Must be in env/ subfolder from chart."
         type: string
         default: "values-kub-ent"
       timeout_minutes:
@@ -43,7 +43,7 @@ jobs:
         shell: bash
         if: env.GHA_HELM_LINT_VALUES == 'values-kub-ent'
         run: |
-          echo "GHA_HELM_LINT_VALUES=values-kub-ent-${GHA_HELM_LINT_ENV}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_LINT_VALUES=${GHA_HELM_LINT_ENV}.yaml" >> $GITHUB_ENV
       - uses: actions/checkout@v4.1.6
       - id: install
         uses: azure/setup-helm@v4
