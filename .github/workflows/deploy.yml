@@ -136,8 +136,9 @@ jobs:
           azure_client_id: ${{ env.AZURE_CLIENT_ID }}
           azure_tenant_id: ${{ env.AZURE_TENANT_ID }}
           azure_subscription_id: ${{ env.AZURE_SUBSCRIPTION_ID }}
-      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+      - uses: entur/gha-meta/.github/actions/k8s-auth@azure-github-token
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
           cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
           project_id: ${{ inputs.project_id }}
