@@ -98,52 +98,40 @@ jobs:
         if: env.GHA_HELM_DEPLOY_VALUES == 'values'
         shell: bash
         run: |
-          echo "GHA_HELM_DEPLOY_VALUES=values-kub-ent-${GHA_HELM_DEPLOY_ENV}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_VALUES=${GHA_HELM_DEPLOY_ENV}.yaml" >> $GITHUB_ENV
       - id: set-registry-azure
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'az'
         shell: bash
         run: |
           echo "GHA_HELM_DEPLOY_REGISTRY=acrentur001.azurecr.io/entur" >> $GITHUB_ENV
-      - id: set-clustername-az
-        name: Set Cluster Name AKS
+      - id: verify-clustername-az
+        name: Verify Cluster Name Azure
         shell: bash
-        if: inputs.cloud_provider == 'az'
+        if: inputs.cloud_provider == 'az' && !env.AZURE_CLUSTER_NAME
         run: |
-          if [ -z "${AZURE_CLUSTER_NAME}" ]; then
-            echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
-            exit 1
-          fi
-          echo "GHA_HELM_DEPLOY_CLUSTER_NAME=${AZURE_CLUSTER_NAME}" >> $GITHUB_ENV
-      - id: set-clustername-gcp
-        name: Set Cluster Name GKE
-        shell: bash
-        if: inputs.cloud_provider == 'gcp'
-        run: |
-          if [ -z "${GHA_HELM_DEPLOY_CLUSTER_NAME}" ]; then
-            echo "GHA_HELM_DEPLOY_CLUSTER_NAME=kub-ent-${GHA_HELM_DEPLOY_ENVIRONMENT}-001" >> $GITHUB_ENV
-          else
-            echo "GHA_HELM_DEPLOY_CLUSTER_NAME=${GHA_HELM_DEPLOY_CLUSTER_NAME}" >> $GITHUB_ENV
-          fi
+          echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
+          exit 1
       - uses: actions/checkout@v4.1.6
       - id: install
         uses: azure/setup-helm@v4
-      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
+      - uses: entur/gha-meta/.github/actions/cloud-auth@azure-github-token
         with:
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
           cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          gcp_workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
           azure_client_id: ${{ env.AZURE_CLIENT_ID }}
           azure_tenant_id: ${{ env.AZURE_TENANT_ID }}
           azure_subscription_id: ${{ env.AZURE_SUBSCRIPTION_ID }}
       - uses: entur/gha-meta/.github/actions/k8s-auth@azure-github-token
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
           cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
-          project_id: ${{ inputs.project_id }}
-          cluster_name: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME }}
+          gcp_project_id: ${{ inputs.project_id }}
+          gcp_cluster_name: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME }}
           azure_cluster_resource_group: ${{ env.AZURE_CLUSTER_RESOURCE_GROUP }}
+          azure_cluster_name: ${{ env.AZURE_CLUSTER_NAME }}
+          azure_token: ${{ secrets.GITHUB_TOKEN }}
       - id: deploy-given-tag
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         shell: bash
