@@ -11,8 +11,6 @@
 * injection issue start ([e940536](https://github.com/entur/gha-helm/commit/e94053684c8443d98eee12f907c1181ff25c988e))
 * prevent injection ([#38](https://github.com/entur/gha-helm/issues/38)) ([63d3bcb](https://github.com/entur/gha-helm/commit/63d3bcb2b60d9e0abb09424ac5b7eb438d00f7ff))
 * refer to v1 of gha-* ([fdc6b36](https://github.com/entur/gha-helm/commit/fdc6b3602d8ca8d6f9d7333f86cdcac379772446))
-* stuff ([efea9f0](https://github.com/entur/gha-helm/commit/efea9f0853f0bac0542043a1949c1a764bb75084))
-* test using shared common actions ([cdac4fc](https://github.com/entur/gha-helm/commit/cdac4fc9ebd938721215cc49afe6cbc6bc1e17d3))
 * test with token ([0c23ba1](https://github.com/entur/gha-helm/commit/0c23ba1d5a20c62bd4b31312a3de4d1796c08e1e))
 
 ## [1.1.0](https://github.com/entur/gha-helm/compare/v1.0.6...v1.1.0) (2024-05-28)
