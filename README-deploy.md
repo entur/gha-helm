@@ -10,7 +10,7 @@ Add the following step to your workflow configuration:
 jobs:
   helm-deploy:
     name: Helm Deploy
-    uses: entur/gha-helm/.github/workflows/deploy.yml@main
+    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
     with:
       environment: dev
       image: amazing-app:latest

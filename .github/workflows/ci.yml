@@ -33,6 +33,7 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
     secrets: inherit
+
   cleanup-deploy-gcp:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-24.04
@@ -42,13 +43,13 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
-      - uses: entur/gha-meta/.github/actions/cloud-auth@azure-github-token
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
           environment: dev
           cloud_provider: gcp
           gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
-      - uses: entur/gha-meta/.github/actions/k8s-auth@azure-github-token
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
         with:
           environment: dev
           cloud_provider: gcp
@@ -109,19 +110,19 @@ jobs:
           helm uninstall amazing-app -n ghaci
   update-lint-doc:
     needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@azure-github-token
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
   update-build-doc:
     needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@azure-github-token
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
   update-unittest-doc:
     needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@azure-github-token
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/unittest.yml
       readme_file: README-unittest.md

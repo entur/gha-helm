@@ -38,7 +38,7 @@ on:
 
 jobs:
   helm-lint:
-    uses: entur/gha-helm/.github/workflows/lint.yml@main
+    uses: entur/gha-helm/.github/workflows/lint.yml@v1
 ```
 
 ```yaml
@@ -50,7 +50,7 @@ on:
 
 jobs:
   helm-deploy:
-    uses: entur/gha-helm/.github/workflows/deploy.yml@main
+    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
     with:
       environment: prd
 ```

@@ -8,7 +8,7 @@ Add the following step to your workflow configuration:
 jobs:
   helm-lint:
     name: Helm Lint
-    uses: entur/gha-helm/.github/workflows/lint.yml@main
+    uses: entur/gha-helm/.github/workflows/lint.yml@v1
     strategy:
       matrix:
         environment: [dev, tst, prd]
