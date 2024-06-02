@@ -4,40 +4,24 @@ on:
   pull_request:
 
 jobs:
-  update-lint-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/lint.yml
-      readme_file: README-lint.md
-  update-build-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/deploy.yml
-      readme_file: README-deploy.md
-  update-unittest-doc:
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/unittest.yml
-      readme_file: README-unittest.md
-
   test-lint-ok-gcp:
     uses: ./.github/workflows/lint.yml
     with:
       environment: dev
       chart: fixture/helm/amazing-app
-
+  test-unittest-ok:
+    uses: ./.github/workflows/unittest.yml
+    with:
+      chart: fixture/helm/amazing-app-az
   test-lint-ok-azure:
+    needs: [test-unittest-ok]
     uses: ./.github/workflows/lint.yml
     with:
       environment: az-dev
       chart: fixture/helm/amazing-app-az
 
-  test-unittest-ok:
-    uses: ./.github/workflows/unittest.yml
-    with:
-      chart: fixture/helm/amazing-app-az
-
   test-deploy-ok-gcp:
+    needs: [test-lint-ok-gcp]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
@@ -49,6 +33,7 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
     secrets: inherit
+
   cleanup-deploy-gcp:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-24.04
@@ -58,30 +43,33 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
-      - id: login-gcp
-        uses: google-github-actions/auth@v2.1.3
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
-          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.SERVICE_ACCOUNT }}
-          token_format: "access_token"
-      - id: get-credentials
-        uses: google-github-actions/get-gke-credentials@v2
+          environment: dev
+          cloud_provider: gcp
+          gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
         with:
-          project_id: "ent-kub-dev"
-          cluster_name: "kub-ent-dev-001"
-          location: "europe-west1"
+          environment: dev
+          cloud_provider: gcp
       - id: clean
         run: |
           helm uninstall amazing-app -n gha-ci
 
   test-deploy-ok-azure:
+    needs: [test-lint-ok-azure]
     uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
     concurrency:
       group: ${{ github.head_ref }}-azure
       cancel-in-progress: true
     with:
       environment: az-dev
-      cloud_provider: Azure
+      cloud_provider: az
       image: getting-started:test-helm-deploy.20240418-SHAd860147
       chart: fixture/helm/amazing-app-az
       release_name: amazing-app
@@ -120,3 +108,21 @@ jobs:
       - id: clean
         run: |
           helm uninstall amazing-app -n ghaci
+  update-lint-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md
+  update-build-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/deploy.yml
+      readme_file: README-deploy.md
+  update-unittest-doc:
+    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/unittest.yml
+      readme_file: README-unittest.md

@@ -10,7 +10,7 @@ Add the following step to your workflow configuration:
 jobs:
   helm-deploy:
     name: Helm Deploy
-    uses: entur/gha-helm/.github/workflows/deploy.yml@main
+    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
     with:
       environment: dev
       image: amazing-app:latest
@@ -23,9 +23,9 @@ jobs:
 |                                     INPUT                                     |  TYPE  | REQUIRED |    DEFAULT    |                                                               DESCRIPTION                                                                |
 |-------------------------------------------------------------------------------|--------|----------|---------------|------------------------------------------------------------------------------------------------------------------------------------------|
 |                <a name="input_chart"></a>[chart](#input_chart)                | string |  false   | `"repo_name"` |                                              The chart, defaults to `helm/$repository_name`                                              |
-|  <a name="input_cloud_provider"></a>[cloud_provider](#input_cloud_provider)   | string |  false   |    `"GCP"`    |                                                    Which repository to use. GCP/Azure                                                    |
+|  <a name="input_cloud_provider"></a>[cloud_provider](#input_cloud_provider)   | string |  false   |    `"gcp"`    |                            Which cloud service provider to <br>use - Google Cloud: 'gcp' <br>or Azure: 'az'                              |
 |     <a name="input_cluster_name"></a>[cluster_name](#input_cluster_name)      | string |  false   |               |                                                          Do not use this input                                                           |
-|       <a name="input_environment"></a>[environment](#input_environment)       | string |   true   |               |                                                          The target environment                                                          |
+|       <a name="input_environment"></a>[environment](#input_environment)       | string |   true   |               |                    GitHub environment to use Google <br>Cloud: (dev, tst, prd) or Azure: (az-dev, az-test, az-prod)                      |
 |                <a name="input_image"></a>[image](#input_image)                | string |   true   |               | The image to deploy, on <br>the form app:tag. Use `na` <br>value to skip replacing the <br>image version in the helm <br>configuration.  |
 |          <a name="input_namespace"></a>[namespace](#input_namespace)          | string |  false   | `"repo_name"` |                                          The namespace to use, defaults <br>to repository name                                           |
 |        <a name="input_project_id"></a>[project_id](#input_project_id)         | string |  false   |               |                                                          Do not use this input                                                           |
