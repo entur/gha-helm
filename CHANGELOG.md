@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.1](https://github.com/entur/gha-helm/compare/v1.1.0...v1.1.1) (2024-06-02)
+
+
+### Bug Fixes
+
+* env var names ([b19ff55](https://github.com/entur/gha-helm/commit/b19ff55dadfbf41ba1e3dd677ec392b3534c8bcb))
+* helm value names ([414df78](https://github.com/entur/gha-helm/commit/414df78f108a69fc713699a228fd626ca6941acd))
+* injection fix, var fix ([72c5bd9](https://github.com/entur/gha-helm/commit/72c5bd9f58b4fef493844d3291cd6d6ba330dd4d))
+* injection issue start ([e940536](https://github.com/entur/gha-helm/commit/e94053684c8443d98eee12f907c1181ff25c988e))
+* prevent injection ([#38](https://github.com/entur/gha-helm/issues/38)) ([63d3bcb](https://github.com/entur/gha-helm/commit/63d3bcb2b60d9e0abb09424ac5b7eb438d00f7ff))
+* refer to v1 of gha-* ([fdc6b36](https://github.com/entur/gha-helm/commit/fdc6b3602d8ca8d6f9d7333f86cdcac379772446))
+* test with token ([0c23ba1](https://github.com/entur/gha-helm/commit/0c23ba1d5a20c62bd4b31312a3de4d1796c08e1e))
+
 ## [1.1.0](https://github.com/entur/gha-helm/compare/v1.0.6...v1.1.0) (2024-05-28)
 
 
