@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.2](https://github.com/entur/gha-helm/compare/v1.1.1...v1.1.2) (2024-06-04)
+
+
+### Bug Fixes
+
+* postpone golden path ([b3bf097](https://github.com/entur/gha-helm/commit/b3bf097fddd7bd39af4cff14e1896f52495a0c7b))
+* postpone golden path ([#40](https://github.com/entur/gha-helm/issues/40)) ([b883550](https://github.com/entur/gha-helm/commit/b88355006c3ca18e697c3cc86605cbca452ef686))
+* update az too ([7857c43](https://github.com/entur/gha-helm/commit/7857c4321779f201ea2e7b524cb3d2ce3d4e6355))
+
 ## [1.1.1](https://github.com/entur/gha-helm/compare/v1.1.0...v1.1.1) (2024-06-02)
 
 
