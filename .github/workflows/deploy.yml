@@ -98,7 +98,7 @@ jobs:
         if: env.GHA_HELM_DEPLOY_VALUES == 'values'
         shell: bash
         run: |
-          echo "GHA_HELM_DEPLOY_VALUES=${GHA_HELM_DEPLOY_ENV}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_VALUES=values-kub-ent-${GHA_HELM_DEPLOY_ENV}.yaml" >> $GITHUB_ENV
       - id: set-registry-azure
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'az'
         shell: bash
