@@ -1,7 +1,7 @@
 ---
 suite: test deployment
 values:
-  - ../env/az-dev.yaml
+  - ../env/values-kub-ent-az-dev.yaml
   - ../values.yaml
 templates:
   - deployment.yaml

@@ -43,7 +43,7 @@ jobs:
         shell: bash
         if: env.GHA_HELM_LINT_VALUES == 'default'
         run: |
-          echo "GHA_HELM_LINT_VALUES=${GHA_HELM_LINT_ENV}.yaml" >> $GITHUB_ENV
+          echo "GHA_HELM_LINT_VALUES=values-kub-ent-${GHA_HELM_LINT_ENV}.yaml" >> $GITHUB_ENV
       - uses: actions/checkout@v4.1.6
       - id: install
         uses: azure/setup-helm@v4
