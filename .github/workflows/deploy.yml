@@ -111,7 +111,7 @@ jobs:
         run: |
           echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
           exit 1
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
       - id: install
         uses: azure/setup-helm@v4
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
