@@ -38,7 +38,7 @@ on:
         type: string
         description: "Do not use this input"
       timeout_minutes:
-        description: "Job timeout in minutes"
+        description: "Job timeout in minutes. Minimum is 3 minutes. Default is 15 minutes."
         type: number
         default: 15
 jobs:
@@ -134,8 +134,11 @@ jobs:
           azure_token: ${{ secrets.GITHUB_TOKEN }}
       - id: deploy-given-tag
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
+        env:
+          TIMEOUT: ${{ inputs.timeout_minutes }}
         shell: bash
         run: |
+          TIMEOUT=$((TIMEOUT-2))
           helm dependency update ./${GHA_HELM_DEPLOY_CHART}
           if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
             helm upgrade ${GHA_HELM_DEPLOY_RELEASE_NAME} ./${GHA_HELM_DEPLOY_CHART}/ \
@@ -143,11 +146,13 @@ jobs:
               --namespace ${GHA_HELM_DEPLOY_NAMESPACE} \
               --set common.container.image=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE} \
               --install \
+              --timeout ${TIMEOUT}m0s \
               --atomic
           else
             helm upgrade ${GHA_HELM_DEPLOY_RELEASE_NAME} ./${GHA_HELM_DEPLOY_CHART}/ \
               -f ${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES} \
               --namespace ${GHA_HELM_DEPLOY_NAMESPACE} \
               --install \
+              --timeout ${TIMEOUT}m0s \
               --atomic
           fi
