@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.3](https://github.com/entur/gha-helm/compare/v1.1.2...v1.1.3) (2024-06-18)
+
+
+### Bug Fixes
+
+* set helm operation timeout, same as input minus two minutes ([b833779](https://github.com/entur/gha-helm/commit/b8337792aad8e7f50d00b0905b85f956c1bcccab))
+* set helm operation timeout, same as input minus two minutes ([#43](https://github.com/entur/gha-helm/issues/43)) ([ff20c37](https://github.com/entur/gha-helm/commit/ff20c37dde2216f2c1c60a6deb09fe7a6d4ae557))
+
 ## [1.1.2](https://github.com/entur/gha-helm/compare/v1.1.1...v1.1.2) (2024-06-04)
 
 
