@@ -78,7 +78,7 @@ jobs:
 
   cleanup-deploy-gcp:
     # run regardless of previous job status
-    if: success() || failure()
+    if: always()
     needs: [test-deploy-ok-gcp, test-deploy-gcp-no-image-update]
     runs-on: ubuntu-24.04
     environment: dev
@@ -120,6 +120,7 @@ jobs:
       namespace: ghaci
     secrets: inherit
   cleanup-deploy-azure:
+    if: always()
     needs: [test-deploy-ok-azure]
     runs-on: ubuntu-24.04
     environment: az-dev
