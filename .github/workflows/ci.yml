@@ -167,12 +167,14 @@ jobs:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
   update-build-doc:
+    if: (success() || failure()) && needs.update-lint-doc.result == 'success'
     needs: [update-lint-doc]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
   update-unittest-doc:
+    if: (success() || failure()) && needs.update-build-doc.result == 'success'
     needs: [update-build-doc]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
