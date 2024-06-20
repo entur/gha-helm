@@ -45,6 +45,7 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
+      timeout_minutes: 6
     secrets: inherit
 
   cleanup-deploy-gcp:
