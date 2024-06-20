@@ -30,7 +30,7 @@ jobs:
 |          <a name="input_namespace"></a>[namespace](#input_namespace)          | string |  false   | `"repo_name"` |                                      The namespace to use, defaults <br>to repository name                                        |
 |        <a name="input_project_id"></a>[project_id](#input_project_id)         | string |  false   |               |                                                       Do not use this input                                                       |
 |     <a name="input_release_name"></a>[release_name](#input_release_name)      | string |  false   | `"repo_name"` |                                        The release name, defaults to <br>repository name                                          |
-| <a name="input_timeout_minutes"></a>[timeout_minutes](#input_timeout_minutes) | number |  false   |     `15`      |                           Job timeout in minutes. Minimum <br>is 3 minutes. Default is <br>15 minutes.                            |
+| <a name="input_timeout_minutes"></a>[timeout_minutes](#input_timeout_minutes) | number |  false   |      `5`      |                           Job timeout in minutes. Minimum <br>is 3 minutes. Default is <br>15 minutes.                            |
 |              <a name="input_values"></a>[values](#input_values)               | string |  false   |  `"values"`   |                              The values file in `./helm/$app/env/`, <br>default `$environment.yaml`                               |
 
 <!-- AUTO-DOC-INPUT:END -->
