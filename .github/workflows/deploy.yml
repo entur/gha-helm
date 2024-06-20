@@ -141,11 +141,10 @@ jobs:
         run: |
           TIMEOUT=$((TIMEOUT-2))
           helm dependency update ./${GHA_HELM_DEPLOY_CHART}
-          if [ "${GHA_HELM_DEPLOY_IMAGE}" == "na" ]; then
-            IMAGE_REPLACE_ARG=""
-          else
+          declare -a IMAGE_REPLACE_ARG
+          if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
             echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
-            IMAGE_REPLACE_ARG="--set common.container.image=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}"
+            IMAGE_REPLACE_ARG+=("--set common.container.image=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}")
           fi
           # Deploy the Helm chart
           if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \
@@ -154,7 +153,7 @@ jobs:
             --install \
             --wait \
             --timeout "${TIMEOUT}m0s" \
-            --debug "$IMAGE_REPLACE_ARG"
+            --debug "${IMAGE_REPLACE_ARG[@]}"
           then
             echo "Helm upgrade/install successful...."
           else
