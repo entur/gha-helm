@@ -38,5 +38,9 @@ jobs:
 ## Outputs
 
 <!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
-No outputs.
+
+|                                          OUTPUT                                          |                         VALUE                          |                                    DESCRIPTION                                     |
+|------------------------------------------------------------------------------------------|--------------------------------------------------------|------------------------------------------------------------------------------------|
+| <a name="output_HELM_DEPLOY_STATUS"></a>[HELM_DEPLOY_STATUS](#output_HELM_DEPLOY_STATUS) | `"${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}"` | Helm Deploy Status 0: Success, <br>1: Failed, 2: Rollback, 3: <br>Rollback Failed  |
+
 <!-- AUTO-DOC-OUTPUT:END -->
