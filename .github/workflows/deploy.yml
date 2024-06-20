@@ -1,10 +1,11 @@
+---
 name: Entur/Helm/Deploy
 
 on:
   workflow_call:
     inputs:
       image:
-        description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm configuration."
+        description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config."
         required: true
         type: string
       cloud_provider:
@@ -140,19 +141,39 @@ jobs:
         run: |
           TIMEOUT=$((TIMEOUT-2))
           helm dependency update ./${GHA_HELM_DEPLOY_CHART}
-          if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
-            helm upgrade ${GHA_HELM_DEPLOY_RELEASE_NAME} ./${GHA_HELM_DEPLOY_CHART}/ \
-              -f ${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES} \
-              --namespace ${GHA_HELM_DEPLOY_NAMESPACE} \
-              --set common.container.image=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE} \
-              --install \
-              --timeout ${TIMEOUT}m0s \
-              --atomic
+          if [ "${GHA_HELM_DEPLOY_IMAGE}" == "na" ]; then
+            IMAGE_REPLACE_ARG=""
           else
-            helm upgrade ${GHA_HELM_DEPLOY_RELEASE_NAME} ./${GHA_HELM_DEPLOY_CHART}/ \
-              -f ${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES} \
-              --namespace ${GHA_HELM_DEPLOY_NAMESPACE} \
-              --install \
-              --timeout ${TIMEOUT}m0s \
-              --atomic
+            echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
+            IMAGE_REPLACE_ARG="--set common.container.image=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}"
+          fi
+          # Deploy the Helm chart
+          if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \
+            -f "${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES}" \
+            --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" \
+            --install \
+            --wait \
+            --timeout "${TIMEOUT}m0s" \
+            --debug "$IMAGE_REPLACE_ARG"
+          then
+            echo "Helm upgrade/install successful...."
+          else
+            # check if we have previous Helm release
+            if helm list -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
+            then
+              echo "Helm upgrade/install failed. Rolling back to the previous version:"
+              if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" 0 --wait --timeout "${TIMEOUT}m0s" --debug
+              then
+                echo "Helm rollback completed..."
+                echo "Action Required: Check your deployment on the K8s cluster to understand why it rolled back."
+                # We exit with a non-zero status code to indicate pipeline failure
+                exit 1
+              else
+                echo "Helm Rollback also failed ... please investigate manually"
+                exit 99
+              fi
+            else
+              echo "No previous Helm release found. Exiting..."
+              exit 1
+            fi
           fi
