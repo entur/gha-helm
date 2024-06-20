@@ -33,6 +33,19 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
     secrets: inherit
+  test-deploy-gcp-no-image-update:
+    needs: [test-deploy-ok-gcp]
+    uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}-gcp
+      cancel-in-progress: true
+    with:
+      environment: dev
+      image: na
+      chart: fixture/helm/amazing-app
+      release_name: amazing-app
+      namespace: gha-ci
+    secrets: inherit
 
   cleanup-deploy-gcp:
     needs: [test-deploy-ok-gcp]
