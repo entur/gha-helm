@@ -6,4 +6,4 @@ common:
     trafficType: public
   container:
     uid: 101 # getting started needs uid 101 because nginx
-    image: override-me
+    image: eu.gcr.io/entur-system-1287/getting-started:latest  # to test image replacement "na" can be used, TODO replace with plattform-example
