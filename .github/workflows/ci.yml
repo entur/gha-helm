@@ -28,7 +28,7 @@ jobs:
       cancel-in-progress: true
     with:
       environment: dev
-      image: getting-started:test-helm-deploy.20240418-SHAd860147
+      image: getting-started:latest
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
@@ -114,7 +114,7 @@ jobs:
     with:
       environment: az-dev
       cloud_provider: az
-      image: getting-started:test-helm-deploy.20240418-SHAd860147
+      image: getting-started:latest
       chart: fixture/helm/amazing-app-az
       release_name: amazing-app
       namespace: ghaci
