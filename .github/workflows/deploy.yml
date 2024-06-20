@@ -39,9 +39,9 @@ on:
         type: string
         description: "Do not use this input"
       timeout_minutes:
-        description: "Job timeout in minutes. Minimum is 3 minutes. Default is 15 minutes."
+        description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
-        default: 5
+        default: 30
 jobs:
   helm-deploy:
     runs-on: ubuntu-24.04
@@ -139,7 +139,7 @@ jobs:
           TIMEOUT: ${{ inputs.timeout_minutes }}
         shell: bash
         run: |
-          TIMEOUT=$((TIMEOUT-2))
+          TIMEOUT=$((TIMEOUT/2-2)) # Helm deploy timeout is half of the total job timeout minus two minutes for possible preparation time.
           helm dependency update ./${GHA_HELM_DEPLOY_CHART}
           declare -a IMAGE_REPLACE_ARG
           if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
@@ -155,7 +155,7 @@ jobs:
             --wait \
             --timeout "${TIMEOUT}m0s" \
             --debug \
-            "${IMAGE_REPLACE_ARG[@]}"
+            ${IMAGE_REPLACE_ARG[@]}
           then
             echo "Helm upgrade/install successful...."
           else
