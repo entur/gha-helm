@@ -42,6 +42,10 @@ on:
         description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
         default: 30
+    outputs:
+      HELM_DEPLOY_STATUS:
+        description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
+        value: ${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
 jobs:
   helm-deploy:
     runs-on: ubuntu-24.04
@@ -72,6 +76,8 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_CLUSTER_NAME: ${{ vars.AZURE_CLUSTER_NAME  }}
       AZURE_CLUSTER_RESOURCE_GROUP: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
+    outputs:
+      HELM_DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
     steps:
       - id: verify-cloud-provider
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'gcp' && env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'az'
@@ -133,7 +139,7 @@ jobs:
           azure_cluster_resource_group: ${{ env.AZURE_CLUSTER_RESOURCE_GROUP }}
           azure_cluster_name: ${{ env.AZURE_CLUSTER_NAME }}
           azure_token: ${{ secrets.GITHUB_TOKEN }}
-      - id: deploy-given-tag
+      - id: helm-deploy
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         env:
           TIMEOUT: ${{ inputs.timeout_minutes }}
@@ -157,24 +163,36 @@ jobs:
             --debug \
             ${IMAGE_REPLACE_ARG[@]}
           then
-            echo "Helm upgrade/install successful...."
+            echo "#################################################################################################"
+            echo " Helm deployment successful."
+            echo "#################################################################################################"
+            echo "HELM_DEPLOY_STATUS=0" >> "$GITHUB_OUTPUT"
           else
             # check if we have previous Helm release
             if helm list -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
             then
-              echo "Helm upgrade/install failed. Rolling back to the previous version:"
+              echo "#################################################################################################"
+              echo "Helm deployment failed. Rolling back to the previous version:"
+              echo "#################################################################################################"
               if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug
               then
-                echo "Helm rollback completed..."
-                echo "Action Required: Check your deployment on the K8s cluster to understand why it rolled back."
-                # We exit with a non-zero status code to indicate pipeline failure
-                exit 1
+                echo "#################################################################################################"
+                echo " Helm rollback completed... please investigate."
+                echo "#################################################################################################"
+                echo "HELM_DEPLOY_STATUS=2" >> "$GITHUB_OUTPUT"
+                exit 2
               else
-                echo "Helm Rollback also failed ... please investigate manually"
-                exit 99
+                echo "#################################################################################################"
+                echo " Helm Rollback failed ... please investigate manually."
+                echo "#################################################################################################"
+                echo "HELM_DEPLOY_STATUS=3" >> "$GITHUB_OUTPUT"
+                exit 3
               fi
             else
-              echo "Helm upgrade/install failed, but no previous Helm release found. Exiting..."
+              echo "#################################################################################################"
+              echo "  Helm upgrade/install failed, but no previous Helm release found. Please investigate."
+              echo "#################################################################################################"
+              echo "HELM_DEPLOY_STATUS=1" >> "$GITHUB_OUTPUT"
               exit 1
             fi
           fi

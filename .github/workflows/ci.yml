@@ -33,8 +33,35 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
     secrets: inherit
-  test-deploy-gcp-no-image-update:
+  test-deploy-gcp-with-rollback:
     needs: [test-deploy-ok-gcp]
+    uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}-gcp
+      cancel-in-progress: true
+    with:
+      environment: dev
+      image: mybadimage:dummy
+      chart: fixture/helm/amazing-app
+      release_name: amazing-app
+      namespace: gha-ci
+      timeout_minutes: 6
+    secrets: inherit
+  verify-rollback-status:
+    if: success() || failure()
+    needs: [test-deploy-gcp-with-rollback]
+    runs-on: ubuntu-24.04
+    environment: dev
+    env:
+      HELM_DEPLOY_STATUS: ${{ needs.test-deploy-gcp-with-rollback.outputs.HELM_DEPLOY_STATUS }}
+    steps:
+      - run: |
+          if [ "${HELM_DEPLOY_STATUS}" != 2 ]; then
+            echo "Rollback failed"
+            exit 1
+          fi
+  test-deploy-gcp-no-image-update:
+    needs: [verify-rollback-status]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
