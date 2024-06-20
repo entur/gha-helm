@@ -41,7 +41,7 @@ on:
       timeout_minutes:
         description: "Job timeout in minutes. Minimum is 3 minutes. Default is 15 minutes."
         type: number
-        default: 15
+        default: 5
 jobs:
   helm-deploy:
     runs-on: ubuntu-24.04
@@ -164,7 +164,7 @@ jobs:
             if helm list -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
             then
               echo "Helm upgrade/install failed. Rolling back to the previous version:"
-              if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" 0 --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug
+              if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug
               then
                 echo "Helm rollback completed..."
                 echo "Action Required: Check your deployment on the K8s cluster to understand why it rolled back."
