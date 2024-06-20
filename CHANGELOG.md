@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/entur/gha-helm/compare/v1.1.3...v1.1.4) (2024-06-20)
+
+
+### Bug Fixes
+
+* improve helm deploy logic ([#46](https://github.com/entur/gha-helm/issues/46)) ([c82818d](https://github.com/entur/gha-helm/commit/c82818d0aa8dacbc23d1a01d6146772394e1f884))
+
 ## [1.1.3](https://github.com/entur/gha-helm/compare/v1.1.2...v1.1.3) (2024-06-18)
 
 
