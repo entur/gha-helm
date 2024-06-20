@@ -61,6 +61,7 @@ jobs:
             exit 1
           fi
   test-deploy-gcp-no-image-update:
+    if: (success() || failure()) && needs.verify-rollback-status.result == 'success'
     needs: [verify-rollback-status]
     uses: ./.github/workflows/deploy.yml
     concurrency:
@@ -76,6 +77,8 @@ jobs:
     secrets: inherit
 
   cleanup-deploy-gcp:
+    # run regardless of previous job status
+    if: success() || failure()
     needs: [test-deploy-ok-gcp, test-deploy-gcp-no-image-update]
     runs-on: ubuntu-24.04
     environment: dev
@@ -150,19 +153,27 @@ jobs:
         run: |
           helm uninstall amazing-app -n ghaci
   update-lint-doc:
-    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    # run only if both test-deploy-ok-azure and test-deploy-gcp-no-image-update are successful, but ignore rollback failure
+    if: (success() || failure()) && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success'
+    needs:
+      [
+        cleanup-deploy-azure,
+        cleanup-deploy-gcp,
+        test-deploy-ok-azure,
+        test-deploy-gcp-no-image-update,
+      ]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
   update-build-doc:
-    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    needs: [update-lint-doc]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
   update-unittest-doc:
-    needs: [test-deploy-ok-azure, test-deploy-ok-gcp]
+    needs: [update-build-doc]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/unittest.yml
