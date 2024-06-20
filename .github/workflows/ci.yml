@@ -114,7 +114,7 @@ jobs:
     with:
       environment: az-dev
       cloud_provider: az
-      image: getting-started:latest
+      image: getting-started:test-helm-deploy.20240418-SHAd860147
       chart: fixture/helm/amazing-app-az
       release_name: amazing-app
       namespace: ghaci
