@@ -144,13 +144,13 @@ jobs:
           declare -a IMAGE_REPLACE_ARG
           if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
             echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
-            IMAGE_REPLACE_ARG+=("--set common.container.image=\"${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}\"")
+            IMAGE_REPLACE_ARG+=("common.container.image=\"${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}\"")
           fi
           # Deploy the Helm chart
           if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \
             -f "${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES}" \
             --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" \
-            "${IMAGE_REPLACE_ARG[@]}" \
+            --set "${IMAGE_REPLACE_ARG[@]}" \
             --install \
             --wait \
             --timeout "${TIMEOUT}m0s" \
