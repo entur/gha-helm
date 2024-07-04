@@ -38,6 +38,9 @@ on:
       cluster_name:
         type: string
         description: "Do not use this input"
+      cluster_location:
+        type: string
+        description: "Defaults to europe-west1"
       timeout_minutes:
         description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
@@ -136,6 +139,7 @@ jobs:
           cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
           gcp_project_id: ${{ inputs.project_id }}
           gcp_cluster_name: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME }}
+          gcp_cluster_location: ${{ inputs.cluster_location }}
           azure_cluster_resource_group: ${{ env.AZURE_CLUSTER_RESOURCE_GROUP }}
           azure_cluster_name: ${{ env.AZURE_CLUSTER_NAME }}
           azure_token: ${{ secrets.GITHUB_TOKEN }}
