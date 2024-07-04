@@ -41,6 +41,7 @@ on:
       cluster_location:
         type: string
         description: "Defaults to europe-west1"
+        default: "europe-west1"
       timeout_minutes:
         description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
