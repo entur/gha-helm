@@ -32,12 +32,16 @@ on:
         description: "The namespace to use, defaults to repository name"
         type: string
         default: "repo_name"
-      project_id:
+      gcp_project_id:
         type: string
         description: "Do not use this input"
-      cluster_name:
+      gcp_cluster_name:
         type: string
         description: "Do not use this input"
+      gcp_cluster_location:
+        type: string
+        description: "Defaults to europe-west1"
+        default: "europe-west1"
       timeout_minutes:
         description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
@@ -66,7 +70,9 @@ jobs:
       GHA_HELM_DEPLOY_NAMESPACE: ${{ inputs.namespace }}
       GHA_HELM_DEPLOY_ENV: ${{inputs.environment }}
       GHA_HELM_DEPLOY_REGISTRY: eu.gcr.io/entur-system-1287
-      GHA_HELM_DEPLOY_CLUSTER_NAME: ${{ inputs.cluster_name }}
+      GHA_HELM_DEPLOY_GCP_PROJECT_ID: ${{ inputs.gcp_project_id }}
+      GHA_HELM_DEPLOY_GCP_CLUSTER_NAME: ${{ inputs.gcp_cluster_name }}
+      GHA_HELM_DEPLOY_GCP_CLUSTER_LOCATION: ${{ inputs.gcp_cluster_location }}
       # ignore "context access might be invalid" warning
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ vars.SERVICE_ACCOUNT }}
@@ -134,8 +140,9 @@ jobs:
         with:
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
           cloud_provider: ${{ env.GHA_HELM_DEPLOY_CLOUD_PROVIDER }}
-          gcp_project_id: ${{ inputs.project_id }}
-          gcp_cluster_name: ${{ env.GHA_HELM_DEPLOY_CLUSTER_NAME }}
+          gcp_project_id: ${{ env.GHA_HELM_DEPLOY_GCP_PROJECT_ID }}
+          gcp_cluster_name: ${{ env.GHA_HELM_DEPLOY_GCP_CLUSTER_NAME }}
+          gcp_cluster_location: ${{ env.GHA_HELM_DEPLOY_GCP_CLUSTER_LOCATION }}
           azure_cluster_resource_group: ${{ env.AZURE_CLUSTER_RESOURCE_GROUP }}
           azure_cluster_name: ${{ env.AZURE_CLUSTER_NAME }}
           azure_token: ${{ secrets.GITHUB_TOKEN }}
