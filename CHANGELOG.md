@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.5](https://github.com/entur/gha-helm/compare/v1.1.4...v1.1.5) (2024-07-05)
+
+
+### Bug Fixes
+
+* add cluster location as input for journey-planner clusters ([8d83fe7](https://github.com/entur/gha-helm/commit/8d83fe7c72ab6affe536bbaf52efc09fade1ae23))
+* add cluster location as input for journey-planner clusters ([a288a11](https://github.com/entur/gha-helm/commit/a288a11fa559cab5d8eff80709c04f6e4ecb8025))
+* add cluster location as input for journey-planner clusters ([#50](https://github.com/entur/gha-helm/issues/50)) ([c1c6ea4](https://github.com/entur/gha-helm/commit/c1c6ea42fb3563e05ec06bca4786e92e6185dae0))
+* Fixes issue [#49](https://github.com/entur/gha-helm/issues/49) ([40e2ab9](https://github.com/entur/gha-helm/commit/40e2ab983829c8ade626fc72be5e05b5e2b51c72))
+
 ## [1.1.4](https://github.com/entur/gha-helm/compare/v1.1.3...v1.1.4) (2024-06-20)
 
 
