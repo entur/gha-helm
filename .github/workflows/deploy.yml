@@ -187,13 +187,13 @@ jobs:
                 echo "#################################################################################################"
                 echo " Helm rollback completed... please investigate."
                 echo "#################################################################################################"
-                echo "${REPONAME}"
                 echo "HELM_DEPLOY_STATUS=2" >> "$GITHUB_OUTPUT"
-                if [ "${REPONAME}" == "gha-helm" ]
+                if [ "${REPONAME}" == "entur/gha-helm" ]
                 then
                   exit 0
+                else
+                  exit 2
                 fi
-                exit 2
               else
                 echo "#################################################################################################"
                 echo " Helm Rollback failed ... please investigate manually."
