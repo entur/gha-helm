@@ -150,6 +150,7 @@ jobs:
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         env:
           TIMEOUT: ${{ inputs.timeout_minutes }}
+          REPONAME: ${{ github.repository }}
         shell: bash
         run: |
           TIMEOUT=$((TIMEOUT/2-2)) # Helm deploy timeout is half of the total job timeout minus two minutes for possible preparation time.
@@ -186,7 +187,12 @@ jobs:
                 echo "#################################################################################################"
                 echo " Helm rollback completed... please investigate."
                 echo "#################################################################################################"
+                echo "${REPONAME}"
                 echo "HELM_DEPLOY_STATUS=2" >> "$GITHUB_OUTPUT"
+                if [ "${REPONAME}" == "gha-helm" ]
+                then
+                  exit 0
+                fi
                 exit 2
               else
                 echo "#################################################################################################"
