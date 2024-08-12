@@ -39,6 +39,10 @@ jobs:
     runs-on: ubuntu-24.04
     environment: dev
     timeout-minutes: 6
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
     steps:
       - id: install
         uses: azure/setup-helm@v4
