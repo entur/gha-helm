@@ -150,10 +150,9 @@ jobs:
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         uses: ./.github/actions/helm-deploy
         with:
-          inputs.timeout_minutes: ${{ env.TIMEOUT }}
-          inputs.environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
-          inputs.image: ${{ env.GHA_HELM_DEPLOY_IMAGE }}
-          inputs.release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
-          inputs.chart: ${{ env.GHA_HELM_DEPLOY_CHART }}
-          inputs.values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
-          inputs.namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
+          timeout_minutes: ${{ inputs.timeout_minutes }}
+          image: ${{ env.GHA_HELM_DEPLOY_IMAGE }}
+          release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          chart: ${{ env.GHA_HELM_DEPLOY_CHART }}
+          values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
+          namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
