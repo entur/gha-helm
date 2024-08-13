@@ -34,7 +34,7 @@ jobs:
       namespace: gha-ci
     secrets: inherit
 
-  test-deploy-gcp-with-rollback:
+  test-deploy-gcp-with-failed-rollback:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-24.04
     environment: dev
