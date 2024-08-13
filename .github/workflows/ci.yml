@@ -73,8 +73,8 @@ jobs:
             core.setFailed('Rollback should fail.')
 
   test-deploy-gcp-no-image-update:
-    if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
-    needs: [test-deploy-gcp-with-rollback]
+    if: (success() || failure()) && needs.test-deploy-gcp-with-failed-rollback.result == 'success'
+    needs: [test-deploy-gcp-with-failed-rollback]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
