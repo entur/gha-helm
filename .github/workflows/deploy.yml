@@ -148,58 +148,11 @@ jobs:
           azure_token: ${{ secrets.GITHUB_TOKEN }}
       - id: helm-deploy
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
-        env:
-          TIMEOUT: ${{ inputs.timeout_minutes }}
-        shell: bash
-        run: |
-          TIMEOUT=$((TIMEOUT/2-2)) # Helm deploy timeout is half of the total job timeout minus two minutes for possible preparation time.
-          helm dependency update ./${GHA_HELM_DEPLOY_CHART}
-          declare -a IMAGE_REPLACE_ARG
-          if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
-            echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
-            IMAGE_REPLACE_ARG+=("--set ")
-            IMAGE_REPLACE_ARG+=("common.container.image=\"${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}\"")
-          fi
-          # Deploy the Helm chart
-          if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \
-            -f "${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES}" \
-            --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" \
-            --install \
-            --wait \
-            --timeout "${TIMEOUT}m0s" \
-            --debug \
-            ${IMAGE_REPLACE_ARG[@]}
-          then
-            echo "#################################################################################################"
-            echo " Helm deployment successful."
-            echo "#################################################################################################"
-            echo "HELM_DEPLOY_STATUS=0" >> "$GITHUB_OUTPUT"
-          else
-            # check if we have previous Helm release
-            if helm list -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
-            then
-              echo "#################################################################################################"
-              echo "Helm deployment failed. Rolling back to the previous version:"
-              echo "#################################################################################################"
-              if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug
-              then
-                echo "#################################################################################################"
-                echo " Helm rollback completed... please investigate."
-                echo "#################################################################################################"
-                echo "HELM_DEPLOY_STATUS=2" >> "$GITHUB_OUTPUT"
-                exit 2
-              else
-                echo "#################################################################################################"
-                echo " Helm Rollback failed ... please investigate manually."
-                echo "#################################################################################################"
-                echo "HELM_DEPLOY_STATUS=3" >> "$GITHUB_OUTPUT"
-                exit 3
-              fi
-            else
-              echo "#################################################################################################"
-              echo "  Helm upgrade/install failed, but no previous Helm release found. Please investigate."
-              echo "#################################################################################################"
-              echo "HELM_DEPLOY_STATUS=1" >> "$GITHUB_OUTPUT"
-              exit 1
-            fi
-          fi
+        uses: ./.github/actions/helm-deploy
+        with:
+          timeout_minutes: ${{ inputs.timeout_minutes }}
+          image: ${{ env.GHA_HELM_DEPLOY_IMAGE }}
+          release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          chart: ${{ env.GHA_HELM_DEPLOY_CHART }}
+          values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
+          namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
