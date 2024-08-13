@@ -66,11 +66,11 @@ jobs:
           chart: fixture/helm/amazing-app
           namespace: gha-ci
       - name: Check if rollback did succeed
-        if: steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '2'
+        if: steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '3'
         uses: actions/github-script@v7
         with:
           script: |
-            core.setFailed('Rollback did not succeed.')
+            core.setFailed('Rollback should fail.')
 
   test-deploy-gcp-no-image-update:
     if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
