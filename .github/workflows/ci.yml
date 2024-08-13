@@ -46,7 +46,7 @@ jobs:
     steps:
       - id: install
         uses: azure/setup-helm@v4
-      - id: cloud auth
+      - id: cloud-auth
         uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
           environment: dev
