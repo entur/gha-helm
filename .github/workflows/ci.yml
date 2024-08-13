@@ -44,6 +44,7 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
+      - uses: actions/checkout@v4
       - id: install
         uses: azure/setup-helm@v4
       - id: cloud-auth
