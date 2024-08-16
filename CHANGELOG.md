@@ -6,7 +6,6 @@
 ### Bug Fixes
 
 * make rollback test run successfully ([#55](https://github.com/entur/gha-helm/issues/55)) ([d141307](https://github.com/entur/gha-helm/commit/d14130702f3d25eb7cf25e00da75f98971dd2eca))
-* use corrent id format ([00f628c](https://github.com/entur/gha-helm/commit/00f628ca0890996a78bee3d1f5a214fc3f71a838))
 
 ## [1.1.5](https://github.com/entur/gha-helm/compare/v1.1.4...v1.1.5) (2024-07-05)
 
