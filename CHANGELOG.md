@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.7](https://github.com/entur/gha-helm/compare/v1.1.6...v1.1.7) (2024-09-03)
+
+
+### Bug Fixes
+
+* use url for action not relative path ([472171b](https://github.com/entur/gha-helm/commit/472171bee683b6304519ab4bcc4dfdbaa5f371e6))
+* use url for action not relative path ([#59](https://github.com/entur/gha-helm/issues/59)) ([2405e11](https://github.com/entur/gha-helm/commit/2405e1104309be6a38e0195ff81e9521e0201823))
+
 ## [1.1.6](https://github.com/entur/gha-helm/compare/v1.1.5...v1.1.6) (2024-08-13)
 
 
