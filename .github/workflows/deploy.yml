@@ -148,7 +148,7 @@ jobs:
           azure_token: ${{ secrets.GITHUB_TOKEN }}
       - id: helm-deploy
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
-        uses: ./.github/actions/helm-deploy
+        uses: entur/gha-helm/.github/actions/helm-deploy@v1
         with:
           timeout_minutes: ${{ inputs.timeout_minutes }}
           image: ${{ env.GHA_HELM_DEPLOY_IMAGE }}
