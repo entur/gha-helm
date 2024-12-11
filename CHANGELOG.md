@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/entur/gha-helm/compare/v1.1.7...v1.1.8) (2024-12-11)
+
+
+### Bug Fixes
+
+* remove entur from image path in azure ([#62](https://github.com/entur/gha-helm/issues/62)) ([9658b9b](https://github.com/entur/gha-helm/commit/9658b9b6f24977b73f2248dd14371f6336d76d3d))
+
 ## [1.1.7](https://github.com/entur/gha-helm/compare/v1.1.6...v1.1.7) (2024-09-03)
 
 
