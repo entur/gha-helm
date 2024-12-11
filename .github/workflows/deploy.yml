@@ -116,7 +116,7 @@ jobs:
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER == 'az'
         shell: bash
         run: |
-          echo "GHA_HELM_DEPLOY_REGISTRY=acrentur001.azurecr.io/entur" >> $GITHUB_ENV
+          echo "GHA_HELM_DEPLOY_REGISTRY=acrentur001.azurecr.io" >> $GITHUB_ENV
       - id: verify-clustername-az
         name: Verify Cluster Name Azure
         shell: bash
