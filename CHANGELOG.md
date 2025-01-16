@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/entur/gha-helm/compare/v1.1.8...v1.2.0) (2025-01-16)
+
+
+### Features
+
+* Add input 'git_ref' for optionally overriding which ref to checkout ([#64](https://github.com/entur/gha-helm/issues/64)) ([b46baea](https://github.com/entur/gha-helm/commit/b46baea6c45ebb6131ccc46bd2bf29ade0faf90c))
+
 ## [1.1.8](https://github.com/entur/gha-helm/compare/v1.1.7...v1.1.8) (2024-12-11)
 
 
