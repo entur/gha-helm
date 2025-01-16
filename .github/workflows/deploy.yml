@@ -46,6 +46,10 @@ on:
         description: "Job timeout in minutes. Helm deploy timeout is half of this value to enable rollback. Default is 30 minutes."
         type: number
         default: 30
+      git_ref:
+        description: "Git reference to check out before deployment. This can be used as an override if necessary"
+        type: string
+        required: false
     outputs:
       HELM_DEPLOY_STATUS:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
@@ -73,6 +77,7 @@ jobs:
       GHA_HELM_DEPLOY_GCP_PROJECT_ID: ${{ inputs.gcp_project_id }}
       GHA_HELM_DEPLOY_GCP_CLUSTER_NAME: ${{ inputs.gcp_cluster_name }}
       GHA_HELM_DEPLOY_GCP_CLUSTER_LOCATION: ${{ inputs.gcp_cluster_location }}
+      GHA_GIT_REF: ${{ inputs.git_ref }}
       # ignore "context access might be invalid" warning
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ vars.SERVICE_ACCOUNT }}
@@ -124,7 +129,14 @@ jobs:
         run: |
           echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
           exit 1
-      - uses: actions/checkout@v4.1.7
+      - id: checkout-default-ref
+        uses: actions/checkout@v4.1.7
+        if: env.GHA_GIT_REF == ''
+      - id: checkout-specific-ref
+        uses: actions/checkout@v4.1.7
+        if: env.GHA_GIT_REF != ''
+        with:
+          ref: ${{ env.GHA_GIT_REF }}
       - id: install
         uses: azure/setup-helm@v4
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
