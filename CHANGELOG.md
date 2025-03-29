@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/entur/gha-helm/compare/v1.2.0...v1.2.1) (2025-03-29)
+
+
+### Bug Fixes
+
+* add --all parameter to list helm releases ([#68](https://github.com/entur/gha-helm/issues/68)) ([615a19e](https://github.com/entur/gha-helm/commit/615a19ecada9e12a267dd3796ae01f74aa9a5983))
+* add -all parameter to list helm releases ([615a19e](https://github.com/entur/gha-helm/commit/615a19ecada9e12a267dd3796ae01f74aa9a5983))
+
 ## [1.2.0](https://github.com/entur/gha-helm/compare/v1.1.8...v1.2.0) (2025-01-16)
 
 
