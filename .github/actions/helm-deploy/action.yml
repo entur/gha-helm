@@ -63,7 +63,7 @@ runs:
           echo "HELM_DEPLOY_STATUS=0" >> "$GITHUB_OUTPUT"
         else
           # check if we have previous Helm release
-          if helm list -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
+          if helm list --all -n "${GHA_HELM_DEPLOY_NAMESPACE}" | grep -q "${GHA_HELM_DEPLOY_RELEASE_NAME}"
           then
             echo "#################################################################################################"
             echo "Helm deployment failed. Rolling back to the previous version:"
