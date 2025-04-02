@@ -97,6 +97,12 @@ jobs:
           echo "Invalid cloud provider input: ${GHA_HELM_DEPLOY_CLOUD_PROVIDER}"
           echo "Valid options are: 'gcp' or 'az'"
           exit 1
+      - id: verify-image
+        if: env.GHA_HELM_DEPLOY_IMAGE == '' || env.GHA_HELM_DEPLOY_IMAGE == ':'
+        shell: bash
+        run: |
+          echo "Invalid image input: ${GHA_HELM_DEPLOY_IMAGE}"
+          exit 1
       - id: set-release-name
         if: env.GHA_HELM_DEPLOY_RELEASE_NAME == 'repo_name'
         shell: bash
