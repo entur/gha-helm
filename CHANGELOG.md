@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/entur/gha-helm/compare/v1.2.1...v1.2.2) (2025-04-02)
+
+
+### Bug Fixes
+
+* invalid image ([#70](https://github.com/entur/gha-helm/issues/70)) ([9a4417b](https://github.com/entur/gha-helm/commit/9a4417bf3b943a9357b19a4c909d2d2cdd6a449e))
+
 ## [1.2.1](https://github.com/entur/gha-helm/compare/v1.2.0...v1.2.1) (2025-03-29)
 
 
