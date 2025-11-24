@@ -136,10 +136,10 @@ jobs:
           echo "GitHub repository environment variable AZURE_CLUSTER_NAME is not set. Setup using tf-azure-apps. Exiting."
           exit 1
       - id: checkout-default-ref
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v6
         if: env.GHA_GIT_REF == ''
       - id: checkout-specific-ref
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v6
         if: env.GHA_GIT_REF != ''
         with:
           ref: ${{ env.GHA_GIT_REF }}
