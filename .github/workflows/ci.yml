@@ -50,9 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - id: install
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: v3.19.2
+          version: "v3.19.2"
       - id: cloud-auth
         uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -148,9 +148,9 @@ jobs:
       pull-requests: write
     steps:
       - id: install
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: v3.19.2
+          version: "v3.19.2"
       - id: login-azure
         uses: Azure/login@v2
         with:
