@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/entur/gha-helm/compare/v1.2.2...v1.2.3) (2025-12-02)
+
+
+### Bug Fixes
+
+* specify helm version ([#78](https://github.com/entur/gha-helm/issues/78)) ([ae9c787](https://github.com/entur/gha-helm/commit/ae9c787455ae1bdc1e9734048c4db9e696dc8f55))
+
 ## [1.2.2](https://github.com/entur/gha-helm/compare/v1.2.1...v1.2.2) (2025-04-02)
 
 
