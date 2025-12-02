@@ -47,6 +47,8 @@ jobs:
       - uses: actions/checkout@v6
       - id: install
         uses: azure/setup-helm@v4
+        with:
+          version: v3.19.2
       - id: lint
         shell: bash
         run: |

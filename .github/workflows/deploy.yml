@@ -145,6 +145,8 @@ jobs:
           ref: ${{ env.GHA_GIT_REF }}
       - id: install
         uses: azure/setup-helm@v4
+        with:
+          version: v3.19.2
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
           environment: ${{ env.GHA_HELM_DEPLOY_ENVIRONMENT }}
