@@ -30,7 +30,9 @@ jobs:
           echo "GHA_HELM_LINT_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - uses: actions/checkout@v6
       - id: install
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        with:
+          version: "v3.19.2"
       - id: install-unittest
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest.git --version=v0.5.1
