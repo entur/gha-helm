@@ -149,6 +149,8 @@ jobs:
     steps:
       - id: install
         uses: azure/setup-helm@v4
+        with:
+          version: v3.19.2
       - id: login-azure
         uses: Azure/login@v2
         with:
