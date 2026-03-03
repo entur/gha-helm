@@ -9,7 +9,7 @@ inputs:
     description: "The chart, defaults to `helm/$repository_name`"
     default: "repo_name"
   image:
-    description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config."
+    description: "The image to deploy, on the form app:tag. Use `na` if you don't have an image to deploy"
     required: true
   release_name:
     description: "The release name, defaults to repository name"
