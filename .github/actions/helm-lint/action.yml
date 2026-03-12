@@ -1,0 +1,46 @@
+name: Entur/Helm/Lint
+description: Helm lint
+inputs:
+  environment:
+    description: "The target environment"
+    required: true
+  chart:
+    description: "The chart, defaults to `helm/$repository_name`"
+    default: "default"
+  values:
+    description: "The values file, default `$environment.yaml`. Must be in env/ subfolder from chart."
+    default: "default"
+runs:
+  using: "composite"
+  steps:
+    - id: set-chart-name
+      shell: bash
+      if: inputs.chart == 'default'
+      run: |
+        echo "GHA_HELM_LINT_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+    - id: set-values-file
+      shell: bash
+      if: inputs.values == 'default'
+      run: |
+        echo "GHA_HELM_LINT_VALUES=values-kub-ent-${{ inputs.environment }}.yaml" >> $GITHUB_ENV
+    - id: set-chart-name-custom
+      shell: bash
+      if: inputs.chart != 'default'
+      run: |
+        echo "GHA_HELM_LINT_CHART=${{ inputs.chart }}" >> $GITHUB_ENV
+    - id: set-values-file-custom
+      shell: bash
+      if: inputs.values != 'default'
+      run: |
+        echo "GHA_HELM_LINT_VALUES=${{ inputs.values }}" >> $GITHUB_ENV
+    - id: install
+      uses: azure/setup-helm@v4
+      with:
+        version: "v3.19.2"
+    - id: lint
+      shell: bash
+      run: |
+        helm lint \
+          --quiet \
+          "${GHA_HELM_LINT_CHART}" \
+          -f "${GHA_HELM_LINT_CHART}/env/${GHA_HELM_LINT_VALUES}"
