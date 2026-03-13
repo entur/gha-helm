@@ -37,6 +37,10 @@ runs:
       uses: azure/setup-helm@v4
       with:
         version: "v3.19.2"
+    - id: dependency-update
+      shell: bash
+      run: |
+        helm dependency update "${GHA_HELM_LINT_CHART}"
     - id: lint
       shell: bash
       run: |
