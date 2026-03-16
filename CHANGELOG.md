@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/entur/gha-helm/compare/v1.2.3...v1.3.0) (2026-03-16)
+
+
+### Features
+
+* support multi-app deploy ([#84](https://github.com/entur/gha-helm/issues/84)) ([ba6e176](https://github.com/entur/gha-helm/commit/ba6e176d5add014ec643ea1fb1e59f6d923fee88))
+
 ## [1.2.3](https://github.com/entur/gha-helm/compare/v1.2.2...v1.2.3) (2025-12-02)
 
 
