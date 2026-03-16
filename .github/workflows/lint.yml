@@ -31,7 +31,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/helm-lint
+      - uses: entur/gha-helm/.github/actions/helm-lint@v1
         with:
           environment: ${{ inputs.environment }}
           chart: ${{ inputs.chart }}
