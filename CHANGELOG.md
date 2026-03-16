@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/entur/gha-helm/compare/v1.3.0...v1.3.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* lint step ([#86](https://github.com/entur/gha-helm/issues/86)) ([5ef2b9e](https://github.com/entur/gha-helm/commit/5ef2b9ec4feaadb9e5d8669c6653029f7caec3a4))
+
 ## [1.3.0](https://github.com/entur/gha-helm/compare/v1.2.3...v1.3.0) (2026-03-16)
 
 
