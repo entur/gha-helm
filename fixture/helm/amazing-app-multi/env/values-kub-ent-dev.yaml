@@ -1,0 +1,7 @@
+multi-1:
+  env: dev
+  ingress:
+    host: amazing-app-multi.dev.entur.io
+
+multi-2:
+  env: dev

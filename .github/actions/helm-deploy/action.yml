@@ -20,6 +20,9 @@ inputs:
   namespace:
     description: "The namespace to use, defaults to repository name"
     default: "repo_name"
+  image_set_path:
+    description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image'."
+    default: "common.container.image"
 outputs:
   HELM_DEPLOY_STATUS:
     description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
@@ -37,6 +40,7 @@ runs:
         GHA_HELM_DEPLOY_CHART: ${{ inputs.chart }}
         GHA_HELM_DEPLOY_VALUES: ${{ inputs.values }}
         GHA_HELM_DEPLOY_NAMESPACE: ${{ inputs.namespace }}
+        GHA_HELM_DEPLOY_IMAGE_SET_PATH: ${{ inputs.image_set_path }}
       shell: bash
       run: |
         TIMEOUT=$((TIMEOUT/2-2)) # Helm deploy timeout is half of the total job timeout minus two minutes for possible preparation time.
@@ -44,8 +48,11 @@ runs:
         declare -a IMAGE_REPLACE_ARG
         if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
           echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
-          IMAGE_REPLACE_ARG+=("--set ")
-          IMAGE_REPLACE_ARG+=("common.container.image=\"${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}\"")
+          IFS=',' read -ra PATHS <<< "${GHA_HELM_DEPLOY_IMAGE_SET_PATH}"
+          for path in "${PATHS[@]}"; do
+            path=$(echo "${path}" | xargs) # trim whitespace
+            IMAGE_REPLACE_ARG+=("--set" "${path}=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}")
+          done
         fi
         # Deploy the Helm chart
         if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \

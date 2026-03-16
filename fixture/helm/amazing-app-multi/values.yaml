@@ -1,0 +1,21 @@
+multi-1:
+  app: amazing-app-multi
+  shortname: amazemult
+  team: example
+  releaseName: amazing-app-multi
+  ingress:
+    trafficType: public
+  container:
+    uid: 101
+    image: eu.gcr.io/entur-system-1287/getting-started:latest
+
+multi-2:
+  app: amazing-app-multi-2
+  shortname: amazemlt2
+  team: example
+  releaseName: amazing-app-multi-2
+  ingress:
+    enabled: false
+  container:
+    uid: 101
+    image: eu.gcr.io/entur-system-1287/getting-started:latest
