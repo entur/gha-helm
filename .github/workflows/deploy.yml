@@ -77,26 +77,28 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           ENVIRONMENT: ${{ inputs.environment }}
           IMAGE: ${{ inputs.image }}
+          ACTOR: ${{ github.actor }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          MESSAGE=":hourglass_flowing_sand: Helm Deploy Pending Approval | ${REPOSITORY} → ${ENVIRONMENT}"
+          MESSAGE=":hourglass_flowing_sand: Helm Deploy Queued | ${REPOSITORY} → ${ENVIRONMENT}"
           echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
 
           BLOCKS=$(jq -nc \
             --arg repo "$REPOSITORY" \
             --arg env "$ENVIRONMENT" \
             --arg image "$IMAGE" \
+            --arg actor "$ACTOR" \
             --arg url "$RUN_URL" \
             '[
-              {"type":"header","text":{"type":"plain_text","text":":hourglass_flowing_sand: Helm Deploy Pending Approval","emoji":true}},
+              {"type":"header","text":{"type":"plain_text","text":":hourglass_flowing_sand: Helm Deploy Queued","emoji":true}},
               {"type":"section","fields":[
                 {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
                 {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
                 {"type":"mrkdwn","text":"*Image:*\n\($image)"},
-                {"type":"mrkdwn","text":"*Status:*\nAwaiting approval"}
+                {"type":"mrkdwn","text":"*Triggered by:*\n\($actor)"}
               ]},
               {"type":"actions","elements":[
-                {"type":"button","text":{"type":"plain_text","text":"Review & Approve"},"url":$url,"style":"primary"}
+                {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url,"style":"primary"}
               ]}
             ]'
           )
@@ -251,6 +253,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           ENVIRONMENT: ${{ inputs.environment }}
           IMAGE: ${{ inputs.image }}
+          ACTOR: ${{ github.actor }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           case "${DEPLOY_STATUS}" in
@@ -291,6 +294,7 @@ jobs:
             --arg env "$ENVIRONMENT" \
             --arg image "$IMAGE" \
             --arg status "$STATUS_TEXT" \
+            --arg actor "$ACTOR" \
             --arg url "$RUN_URL" \
             '[
               {"type":"header","text":{"type":"plain_text","text":"\($emoji) \($title)","emoji":true}},
@@ -298,7 +302,8 @@ jobs:
                 {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
                 {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
                 {"type":"mrkdwn","text":"*Image:*\n\($image)"},
-                {"type":"mrkdwn","text":"*Status:*\n\($status)"}
+                {"type":"mrkdwn","text":"*Status:*\n\($status)"},
+                {"type":"mrkdwn","text":"*Triggered by:*\n\($actor)"}
               ]},
               {"type":"actions","elements":[
                 {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url}
