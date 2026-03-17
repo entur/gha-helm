@@ -55,7 +55,7 @@ on:
         type: string
         required: false
       slack_channel:
-        description: "Slack channel ID to post deploy status notifications to. If not provided, no Slack message is sent."
+        description: "Slack channel ID to post deploy status notifications to. If not provided, no Slack message is sent. Requires 'secrets: inherit' on the caller workflow and '/invite @GitHub Actions' in the Slack channel."
         type: string
         required: false
     outputs:
@@ -63,6 +63,55 @@ on:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
         value: ${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
 jobs:
+  slack-pending:
+    if: inputs.slack_channel != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    outputs:
+      message: ${{ steps.build-message.outputs.message }}
+      blocks: ${{ steps.build-message.outputs.blocks }}
+    steps:
+      - id: build-message
+        shell: bash
+        env:
+          REPOSITORY: ${{ github.repository }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE: ${{ inputs.image }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MESSAGE=":hourglass_flowing_sand: Helm Deploy Pending Approval | ${REPOSITORY} → ${ENVIRONMENT}"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+
+          BLOCKS=$(jq -nc \
+            --arg repo "$REPOSITORY" \
+            --arg env "$ENVIRONMENT" \
+            --arg image "$IMAGE" \
+            --arg url "$RUN_URL" \
+            '[
+              {"type":"header","text":{"type":"plain_text","text":":hourglass_flowing_sand: Helm Deploy Pending Approval","emoji":true}},
+              {"type":"section","fields":[
+                {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
+                {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
+                {"type":"mrkdwn","text":"*Image:*\n\($image)"},
+                {"type":"mrkdwn","text":"*Status:*\nAwaiting approval"}
+              ]},
+              {"type":"actions","elements":[
+                {"type":"button","text":{"type":"plain_text","text":"Review & Approve"},"url":$url,"style":"primary"}
+              ]}
+            ]'
+          )
+          echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+          echo "$BLOCKS" >> "$GITHUB_OUTPUT"
+          echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+  slack-pending-notify:
+    if: inputs.slack_channel != ''
+    needs: [slack-pending]
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel }}
+      message: ${{ needs.slack-pending.outputs.message }}
+      blocks: ${{ needs.slack-pending.outputs.blocks }}
+    secrets: inherit
   helm-deploy:
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ inputs.timeout_minutes }}

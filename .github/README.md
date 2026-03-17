@@ -53,4 +53,7 @@ jobs:
     uses: entur/gha-helm/.github/workflows/deploy.yml@v1
     with:
       environment: prd
+      image: amazing-app:latest
+      slack_channel: my-channel-id # optional
+    secrets: inherit # required for slack notifications
 ```

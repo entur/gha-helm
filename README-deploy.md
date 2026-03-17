@@ -14,6 +14,8 @@ jobs:
     with:
       environment: dev
       image: amazing-app:latest
+      slack_channel: my-channel-id # optional
+    secrets: inherit # required for slack notifications
 ```
 
 ## Inputs
