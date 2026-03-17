@@ -54,6 +54,10 @@ on:
         description: "Git reference to check out before deployment. This can be used as an override if necessary"
         type: string
         required: false
+      slack_channel:
+        description: "Slack channel ID to post deploy status notifications to. If not provided, no Slack message is sent."
+        type: string
+        required: false
     outputs:
       HELM_DEPLOY_STATUS:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
@@ -182,3 +186,85 @@ jobs:
           values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
           namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
+  prepare-slack:
+    if: always() && inputs.slack_channel != ''
+    needs: [helm-deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    outputs:
+      message: ${{ steps.build-message.outputs.message }}
+      blocks: ${{ steps.build-message.outputs.blocks }}
+    steps:
+      - id: build-message
+        shell: bash
+        env:
+          DEPLOY_STATUS: ${{ needs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+          REPOSITORY: ${{ github.repository }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE: ${{ inputs.image }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "${DEPLOY_STATUS}" in
+            0)
+              EMOJI=":white_check_mark:"
+              TITLE="Helm Deploy Successful"
+              STATUS_TEXT="Deploy Successful"
+              ;;
+            1)
+              EMOJI=":x:"
+              TITLE="Helm Deploy Failed"
+              STATUS_TEXT="Deploy Failed (no previous release to roll back to)"
+              ;;
+            2)
+              EMOJI=":warning:"
+              TITLE="Helm Deploy Failed — Rolled Back"
+              STATUS_TEXT="Deploy Failed, Rollback Succeeded"
+              ;;
+            3)
+              EMOJI=":rotating_light:"
+              TITLE="CRITICAL — Helm Deploy & Rollback Failed"
+              STATUS_TEXT="Deploy Failed, Rollback Also Failed"
+              ;;
+            *)
+              EMOJI=":question:"
+              TITLE="Helm Deploy Status Unknown"
+              STATUS_TEXT="Unknown (status: ${DEPLOY_STATUS:-empty})"
+              ;;
+          esac
+
+          MESSAGE="${EMOJI} ${TITLE} | ${REPOSITORY} → ${ENVIRONMENT}"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+
+          BLOCKS=$(jq -nc \
+            --arg emoji "$EMOJI" \
+            --arg title "$TITLE" \
+            --arg repo "$REPOSITORY" \
+            --arg env "$ENVIRONMENT" \
+            --arg image "$IMAGE" \
+            --arg status "$STATUS_TEXT" \
+            --arg url "$RUN_URL" \
+            '[
+              {"type":"header","text":{"type":"plain_text","text":"\($emoji) \($title)","emoji":true}},
+              {"type":"section","fields":[
+                {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
+                {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
+                {"type":"mrkdwn","text":"*Image:*\n\($image)"},
+                {"type":"mrkdwn","text":"*Status:*\n\($status)"}
+              ]},
+              {"type":"actions","elements":[
+                {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url}
+              ]}
+            ]'
+          )
+          echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+          echo "$BLOCKS" >> "$GITHUB_OUTPUT"
+          echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+  slack-notify:
+    if: always() && inputs.slack_channel != ''
+    needs: [prepare-slack]
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel }}
+      message: ${{ needs.prepare-slack.outputs.message }}
+      blocks: ${{ needs.prepare-slack.outputs.blocks }}
+    secrets: inherit
