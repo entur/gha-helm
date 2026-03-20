@@ -111,14 +111,12 @@ jobs:
             '[
               {"type":"header","text":{"type":"plain_text","text":":lock: Approval Needed","emoji":true}},
               {"type":"section","fields":[
-                {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
-                {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
-                {"type":"mrkdwn","text":"*Image:*\n\($image)"},
-                {"type":"mrkdwn","text":"*Triggered by:*\n\($actor)"}
+                {"type":"mrkdwn","text":"*Repository:* \($repo)"},
+                {"type":"mrkdwn","text":"*Environment:* \($env)"},
+                {"type":"mrkdwn","text":"*Image:* \($image)"},
+                {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
               ]},
-              {"type":"actions","elements":[
-                {"type":"button","text":{"type":"plain_text","text":"Approve Deployment"},"url":$url,"style":"primary"}
-              ]}
+              {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|Approve Deployment>"}}
             ]'
           )
           echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
@@ -318,15 +316,13 @@ jobs:
             '[
               {"type":"header","text":{"type":"plain_text","text":"\($emoji) \($title)","emoji":true}},
               {"type":"section","fields":[
-                {"type":"mrkdwn","text":"*Repository:*\n\($repo)"},
-                {"type":"mrkdwn","text":"*Environment:*\n\($env)"},
-                {"type":"mrkdwn","text":"*Image:*\n\($image)"},
-                {"type":"mrkdwn","text":"*Status:*\n\($status)"},
-                {"type":"mrkdwn","text":"*Triggered by:*\n\($actor)"}
+                {"type":"mrkdwn","text":"*Repository:* \($repo)"},
+                {"type":"mrkdwn","text":"*Environment:* \($env)"},
+                {"type":"mrkdwn","text":"*Image:* \($image)"},
+                {"type":"mrkdwn","text":"*Status:* \($status)"},
+                {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
               ]},
-              {"type":"actions","elements":[
-                {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url,"style":"primary"}
-              ]}
+              {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|View Workflow Run>"}}
             ]'
           )
           echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
