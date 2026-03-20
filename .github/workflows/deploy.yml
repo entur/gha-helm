@@ -123,7 +123,7 @@ jobs:
           echo "$BLOCKS" >> "$GITHUB_OUTPUT"
           echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
   slack-pending-notify:
-    if: inputs.slack_channel != '' && needs.slack-pending.outputs.message != ''
+    if: needs.slack-pending.outputs.message != ''
     needs: [slack-pending]
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
@@ -329,7 +329,7 @@ jobs:
           echo "$BLOCKS" >> "$GITHUB_OUTPUT"
           echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
   slack-notify:
-    if: always() && inputs.slack_channel != ''
+    if: always() && inputs.slack_channel != '' && needs.prepare-slack.outputs.message != ''
     needs: [prepare-slack]
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
