@@ -325,7 +325,7 @@ jobs:
                 {"type":"mrkdwn","text":"*Triggered by:*\n\($actor)"}
               ]},
               {"type":"actions","elements":[
-                {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url}
+                {"type":"button","text":{"type":"plain_text","text":"View Workflow Run"},"url":$url,"style":"primary"}
               ]}
             ]'
           )
