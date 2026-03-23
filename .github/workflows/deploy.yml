@@ -54,8 +54,8 @@ on:
         description: "Git reference to check out before deployment. This can be used as an override if necessary"
         type: string
         required: false
-      slack_channel:
-        description: "Slack channel ID to post deploy status notifications to. If not provided, no Slack message is sent. Requires 'secrets: inherit' on the caller workflow and '/invite @GitHub Actions' in the Slack channel."
+      slack_channel_id:
+        description: "Optional Slack channel ID (not name) to post deploy status notifications to. Requires 'secrets: inherit' on the caller workflow and run a '/invite @GitHub Actions' in the Slack channel."
         type: string
         required: false
     outputs:
@@ -64,7 +64,7 @@ on:
         value: ${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
 jobs:
   slack-pending:
-    if: inputs.slack_channel != ''
+    if: inputs.slack_channel_id != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     outputs:
@@ -127,7 +127,7 @@ jobs:
     needs: [slack-pending]
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
-      channel_id: ${{ inputs.slack_channel }}
+      channel_id: ${{ inputs.slack_channel_id }}
       message: ${{ needs.slack-pending.outputs.message }}
       blocks: ${{ needs.slack-pending.outputs.blocks }}
     secrets: inherit
@@ -137,9 +137,9 @@ jobs:
     name: Helm deploy
     environment: ${{ inputs.environment }}
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
+      pull-requests: read
     env:
       GHA_HELM_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       GHA_HELM_DEPLOY_IMAGE: ${{ inputs.image }}
@@ -158,7 +158,6 @@ jobs:
       # ignore "context access might be invalid" warning
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ vars.SERVICE_ACCOUNT }}
-      GCP_PROJECT_ID: ${{ inputs.project_id }}
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
@@ -254,8 +253,9 @@ jobs:
           values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
           namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
+          registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
   prepare-slack:
-    if: always() && inputs.slack_channel != ''
+    if: always() && inputs.slack_channel_id != ''
     needs: [helm-deploy]
     runs-on: ubuntu-24.04
     timeout-minutes: 1
@@ -329,25 +329,25 @@ jobs:
           echo "$BLOCKS" >> "$GITHUB_OUTPUT"
           echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
   slack-notify:
-    if: always() && inputs.slack_channel != '' && needs.prepare-slack.outputs.message != ''
+    if: always() && inputs.slack_channel_id != '' && needs.prepare-slack.outputs.message != ''
     needs: [prepare-slack]
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
-      channel_id: ${{ inputs.slack_channel }}
+      channel_id: ${{ inputs.slack_channel_id }}
       message: ${{ needs.prepare-slack.outputs.message }}
       blocks: ${{ needs.prepare-slack.outputs.blocks }}
     secrets: inherit
   slack-approved-react:
     if: >-
       always() &&
-      inputs.slack_channel != '' &&
+      inputs.slack_channel_id != '' &&
       needs.slack-pending-notify.result == 'success' &&
       needs.helm-deploy.result != 'cancelled' &&
       needs.helm-deploy.result != 'skipped'
     needs: [slack-pending-notify, helm-deploy]
     uses: entur/gha-slack/.github/workflows/react.yml@v3
     with:
-      channel_id: ${{ inputs.slack_channel }}
+      channel_id: ${{ inputs.slack_channel_id }}
       message_ts: ${{ needs.slack-pending-notify.outputs.message_ts }}
       emoji: white_check_mark
     secrets: inherit
