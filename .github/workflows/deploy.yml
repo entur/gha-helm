@@ -21,7 +21,7 @@ on:
         type: string
         default: "repo_name"
       values:
-        description: "The values file in `./helm/$app/env/`, default `$environment.yaml`"
+        description: "The values file in `./helm/$app/env/`, default `values-kub-ent-$environment.yaml`"
         type: string
         default: "values"
       release_name:
@@ -336,4 +336,18 @@ jobs:
       channel_id: ${{ inputs.slack_channel }}
       message: ${{ needs.prepare-slack.outputs.message }}
       blocks: ${{ needs.prepare-slack.outputs.blocks }}
+    secrets: inherit
+  slack-approved-react:
+    if: >-
+      always() &&
+      inputs.slack_channel != '' &&
+      needs.slack-pending-notify.result == 'success' &&
+      needs.helm-deploy.result != 'cancelled' &&
+      needs.helm-deploy.result != 'skipped'
+    needs: [slack-pending-notify, helm-deploy]
+    uses: entur/gha-slack/.github/workflows/react.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel }}
+      message_ts: ${{ needs.slack-pending-notify.outputs.message_ts }}
+      emoji: white_check_mark
     secrets: inherit
