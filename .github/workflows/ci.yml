@@ -196,7 +196,7 @@ jobs:
         with:
           version: "v3.19.2"
       - id: login-azure
-        uses: Azure/login@v2
+        uses: Azure/login@v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
