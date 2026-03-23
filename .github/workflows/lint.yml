@@ -12,7 +12,7 @@ on:
         type: string
         default: "default"
       values:
-        description: "The values file, default `$environment.yaml`. Must be in env/ subfolder from chart."
+        description: "The values file in `./helm/$app/env/`, default `values-kub-ent-$environment.yaml`"
         type: string
         default: "default"
       timeout_minutes:

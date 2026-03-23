@@ -21,7 +21,7 @@ on:
         type: string
         default: "repo_name"
       values:
-        description: "The values file in `./helm/$app/env/`, default `$environment.yaml`"
+        description: "The values file in `./helm/$app/env/`, default `values-kub-ent-$environment.yaml`"
         type: string
         default: "values"
       release_name:
@@ -54,20 +54,92 @@ on:
         description: "Git reference to check out before deployment. This can be used as an override if necessary"
         type: string
         required: false
+      slack_channel_id:
+        description: "Optional Slack channel ID (not name) to post deploy status notifications to. Requires 'secrets: inherit' on the caller workflow and run a '/invite @GitHub Actions' in the Slack channel."
+        type: string
+        required: false
     outputs:
       HELM_DEPLOY_STATUS:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
         value: ${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
 jobs:
+  slack-pending:
+    if: inputs.slack_channel_id != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    outputs:
+      message: ${{ steps.build-message.outputs.message }}
+      blocks: ${{ steps.build-message.outputs.blocks }}
+    steps:
+      - id: check-approval
+        name: check if environment has approval gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          if ! RULES=$(gh api "repos/${REPOSITORY}/environments/${ENVIRONMENT}" --jq '[.protection_rules[]?.type] | join(",")' 2>&1); then
+            echo "::warning::Could not fetch environment protection rules: ${RULES}, requires read access to the repository."
+            echo "has_approval_gate=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$RULES" == *"required_reviewers"* ]]; then
+            echo "has_approval_gate=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_approval_gate=false" >> "$GITHUB_OUTPUT"
+          fi
+      - id: build-message
+        if: steps.check-approval.outputs.has_approval_gate == 'true'
+        shell: bash
+        env:
+          REPOSITORY: ${{ github.repository }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE: ${{ inputs.image }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MESSAGE=":lock: Approval Needed | ${REPOSITORY} → ${ENVIRONMENT}"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+
+          BLOCKS=$(jq -nc \
+            --arg repo "$REPOSITORY" \
+            --arg env "$ENVIRONMENT" \
+            --arg image "$IMAGE" \
+            --arg actor "$ACTOR" \
+            --arg url "$RUN_URL" \
+            '[
+              {"type":"header","text":{"type":"plain_text","text":":lock: Approval Needed","emoji":true}},
+              {"type":"section","fields":[
+                {"type":"mrkdwn","text":"*Repository:* \($repo)"},
+                {"type":"mrkdwn","text":"*Environment:* \($env)"},
+                {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
+              ]},
+              {"type":"context","elements":[{"type":"mrkdwn","text":"Image: `\($image)`"}]},
+              {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|Approve Deployment>"}}
+            ]'
+          )
+          echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+          echo "$BLOCKS" >> "$GITHUB_OUTPUT"
+          echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+  slack-pending-notify:
+    if: needs.slack-pending.outputs.message != ''
+    needs: [slack-pending]
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel_id }}
+      message: ${{ needs.slack-pending.outputs.message }}
+      blocks: ${{ needs.slack-pending.outputs.blocks }}
+    secrets: inherit
   helm-deploy:
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ inputs.timeout_minutes }}
     name: Helm deploy
     environment: ${{ inputs.environment }}
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
+      pull-requests: read
     env:
       GHA_HELM_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       GHA_HELM_DEPLOY_IMAGE: ${{ inputs.image }}
@@ -86,7 +158,6 @@ jobs:
       # ignore "context access might be invalid" warning
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ vars.SERVICE_ACCOUNT }}
-      GCP_PROJECT_ID: ${{ inputs.project_id }}
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
@@ -182,3 +253,101 @@ jobs:
           values: ${{ env.GHA_HELM_DEPLOY_VALUES }}
           namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
+          registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
+  prepare-slack:
+    if: always() && inputs.slack_channel_id != ''
+    needs: [helm-deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    outputs:
+      message: ${{ steps.build-message.outputs.message }}
+      blocks: ${{ steps.build-message.outputs.blocks }}
+    steps:
+      - id: build-message
+        shell: bash
+        env:
+          DEPLOY_STATUS: ${{ needs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+          REPOSITORY: ${{ github.repository }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE: ${{ inputs.image }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "${DEPLOY_STATUS}" in
+            0)
+              EMOJI=":white_check_mark:"
+              TITLE="Helm Deploy Successful"
+              STATUS_TEXT="Deploy Successful"
+              ;;
+            1)
+              EMOJI=":x:"
+              TITLE="Helm Deploy Failed"
+              STATUS_TEXT="Deploy Failed (no previous release to roll back to)"
+              ;;
+            2)
+              EMOJI=":warning:"
+              TITLE="Helm Deploy Failed — Rolled Back"
+              STATUS_TEXT="Deploy Failed, Rollback Succeeded"
+              ;;
+            3)
+              EMOJI=":rotating_light:"
+              TITLE="CRITICAL — Helm Deploy & Rollback Failed"
+              STATUS_TEXT="Deploy Failed, Rollback Also Failed"
+              ;;
+            *)
+              EMOJI=":question:"
+              TITLE="Helm Deploy Status Unknown"
+              STATUS_TEXT="Unknown (status: ${DEPLOY_STATUS:-empty})"
+              ;;
+          esac
+
+          MESSAGE="${EMOJI} ${TITLE} | ${REPOSITORY} → ${ENVIRONMENT}"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+
+          BLOCKS=$(jq -nc \
+            --arg emoji "$EMOJI" \
+            --arg title "$TITLE" \
+            --arg repo "$REPOSITORY" \
+            --arg env "$ENVIRONMENT" \
+            --arg image "$IMAGE" \
+            --arg status "$STATUS_TEXT" \
+            --arg actor "$ACTOR" \
+            --arg url "$RUN_URL" \
+            '[
+              {"type":"header","text":{"type":"plain_text","text":"\($emoji) \($title)","emoji":true}},
+              {"type":"section","fields":[
+                {"type":"mrkdwn","text":"*Repository:* \($repo)"},
+                {"type":"mrkdwn","text":"*Environment:* \($env)"},
+                {"type":"mrkdwn","text":"*Status:* \($status)"},
+                {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
+              ]},
+              {"type":"context","elements":[{"type":"mrkdwn","text":"Image: `\($image)`"}]},
+              {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|View Workflow Run>"}}
+            ]'
+          )
+          echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+          echo "$BLOCKS" >> "$GITHUB_OUTPUT"
+          echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
+  slack-notify:
+    if: always() && inputs.slack_channel_id != '' && needs.prepare-slack.outputs.message != ''
+    needs: [prepare-slack]
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel_id }}
+      message: ${{ needs.prepare-slack.outputs.message }}
+      blocks: ${{ needs.prepare-slack.outputs.blocks }}
+    secrets: inherit
+  slack-approved-react:
+    if: >-
+      always() &&
+      inputs.slack_channel_id != '' &&
+      needs.slack-pending-notify.result == 'success' &&
+      needs.helm-deploy.result != 'cancelled' &&
+      needs.helm-deploy.result != 'skipped'
+    needs: [slack-pending-notify, helm-deploy]
+    uses: entur/gha-slack/.github/workflows/react.yml@v3
+    with:
+      channel_id: ${{ inputs.slack_channel_id }}
+      message_ts: ${{ needs.slack-pending-notify.outputs.message_ts }}
+      emoji: white_check_mark
+    secrets: inherit

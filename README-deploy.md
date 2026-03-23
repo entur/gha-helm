@@ -2,9 +2,7 @@
 
 ## Usage
 
-See [plattform-examples](https://github.com/entur/plattform-examples/blob/main/.github/workflows/cd.yml) for a real-world example.
-
-Add the following step to your workflow configuration:
+For complete usage examples and golden path recommendations, see the [Platform Examples repository](https://github.com/entur/platform-examples/).
 
 ```yml
 jobs:
@@ -14,6 +12,8 @@ jobs:
     with:
       environment: dev
       image: amazing-app:latest
+      slack_channel_id: GXYZABCD # optional slack channel ID for notifications
+    secrets: inherit # optional - required for slack notifications
 ```
 
 ## Inputs
@@ -33,8 +33,9 @@ jobs:
 |          <a name="input_image_set_path"></a>[image_set_path](#input_image_set_path)          | string |  false   | `"common.container.image"` | Comma-separated Helm values path(s) for <br>the container image. Override when <br>using aliased common chart dependencies <br>(multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image' - or <br>when using 3rd party charts.  |
 |                 <a name="input_namespace"></a>[namespace](#input_namespace)                  | string |  false   |       `"repo_name"`        |                                                                                              The namespace to use, defaults <br>to repository name                                                                                               |
 |             <a name="input_release_name"></a>[release_name](#input_release_name)             | string |  false   |       `"repo_name"`        |                                                                                                The release name, defaults to <br>repository name                                                                                                 |
+|       <a name="input_slack_channel_id"></a>[slack_channel_id](#input_slack_channel_id)       | string |  false   |                            |                  Optional Slack channel ID (not name) <br>to post deploy status notifications <br>to. Requires 'secrets: inherit' on <br>the caller workflow and run <br>a '/invite @GitHub Actions' in <br>the Slack channel.                   |
 |        <a name="input_timeout_minutes"></a>[timeout_minutes](#input_timeout_minutes)         | number |  false   |            `30`            |                                                            Job timeout in minutes. Helm <br>deploy timeout is half of <br>this value to enable rollback. <br>Default is 30 minutes.                                                              |
-|                      <a name="input_values"></a>[values](#input_values)                      | string |  false   |         `"values"`         |                                                                                     The values file in `./helm/$app/env/`, <br>default `$environment.yaml`                                                                                       |
+|                      <a name="input_values"></a>[values](#input_values)                      | string |  false   |         `"values"`         |                                                                              The values file in `./helm/$app/env/`, <br>default `values-kub-ent-$environment.yaml`                                                                               |
 
 <!-- AUTO-DOC-INPUT:END -->
 
