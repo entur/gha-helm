@@ -113,9 +113,9 @@ jobs:
               {"type":"section","fields":[
                 {"type":"mrkdwn","text":"*Repository:* \($repo)"},
                 {"type":"mrkdwn","text":"*Environment:* \($env)"},
-                {"type":"mrkdwn","text":"*Image:* \($image)"},
                 {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
               ]},
+              {"type":"context","elements":[{"type":"mrkdwn","text":"Image: `\($image)`"}]},
               {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|Approve Deployment>"}}
             ]'
           )
@@ -318,10 +318,10 @@ jobs:
               {"type":"section","fields":[
                 {"type":"mrkdwn","text":"*Repository:* \($repo)"},
                 {"type":"mrkdwn","text":"*Environment:* \($env)"},
-                {"type":"mrkdwn","text":"*Image:* \($image)"},
                 {"type":"mrkdwn","text":"*Status:* \($status)"},
                 {"type":"mrkdwn","text":"*Triggered by:* \($actor)"}
               ]},
+              {"type":"context","elements":[{"type":"mrkdwn","text":"Image: `\($image)`"}]},
               {"type":"section","text":{"type":"mrkdwn","text":"<\($url)|View Workflow Run>"}}
             ]'
           )
