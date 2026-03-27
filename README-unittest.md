@@ -7,7 +7,7 @@ Test suite for your helm chart configuration.
 
 ## Usage
 
-Add the following step to your workflow configuration:
+For complete usage examples and golden path recommendations, see the [Platform Examples repository](https://github.com/entur/platform-examples/).
 
 ```yml
 jobs:

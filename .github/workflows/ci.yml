@@ -80,6 +80,7 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
+      slack_channel_id: GFBL95A0J # sandbox-channel
     secrets: inherit
 
   test-deploy-gcp-with-failed-rollback:

@@ -13,9 +13,13 @@ GitHub Actions for working with Helm
 ## Golden Path
 
 - `./helm/your_chart` at the root of your repository
-- Chart name is equal to repository name
+- Chart name matches the repository name
 
-### Example
+## Usage
+
+For complete usage examples and golden path recommendations, see the [Platform Examples repository](https://github.com/entur/platform-examples/).
+
+### Examples
 
 Let's look at an example, assume our repo is called `amazing-app`:
 
@@ -53,4 +57,7 @@ jobs:
     uses: entur/gha-helm/.github/workflows/deploy.yml@v1
     with:
       environment: prd
+      image: amazing-app:latest
+      slack_channel_id: GXYZABCD # optional slack channel ID for notifications
+    secrets: inherit # required for slack notifications
 ```

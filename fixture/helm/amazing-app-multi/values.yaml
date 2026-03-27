@@ -7,7 +7,12 @@ multi-1:
     trafficType: public
   container:
     uid: 101
-    image: eu.gcr.io/entur-system-1287/getting-started:latest
+    image: nginxinc/nginx-unprivileged:stable-alpine
+    probes:
+      liveness:
+        path: /
+      readiness:
+        path: /
 
 multi-2:
   app: amazing-app-multi-2
@@ -18,4 +23,9 @@ multi-2:
     enabled: false
   container:
     uid: 101
-    image: eu.gcr.io/entur-system-1287/getting-started:latest
+    image: nginxinc/nginx-unprivileged:stable-alpine
+    probes:
+      liveness:
+        path: /
+      readiness:
+        path: /
