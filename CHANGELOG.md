@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/entur/gha-helm/compare/v1.3.1...v1.4.0) (2026-03-23)
+
+
+### Features
+
+* Add optional slack_channel input ([#88](https://github.com/entur/gha-helm/issues/88)) ([141c732](https://github.com/entur/gha-helm/commit/141c73241c36e9c3277f3eed4b4b9e7abceb9cfe))
+
 ## [1.3.1](https://github.com/entur/gha-helm/compare/v1.3.0...v1.3.1) (2026-03-16)
 
 
