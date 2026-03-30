@@ -3,6 +3,9 @@ name: Entur/Helm/CI
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify-pr:
     name: Verify PR
@@ -50,9 +53,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -89,9 +91,8 @@ jobs:
     environment: dev
     timeout-minutes: 6
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v6
       - id: install
@@ -146,9 +147,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -168,9 +168,8 @@ jobs:
     needs: [test-lint-ok-azure]
     uses: ./.github/workflows/deploy.yml
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     concurrency:
       group: ${{ github.head_ref }}-azure
       cancel-in-progress: true
@@ -188,9 +187,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: az-dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - id: install
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
