@@ -91,7 +91,7 @@ jobs:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-24.04
     environment: dev
-    timeout-minutes: 6
+    timeout-minutes: 8
     permissions:
       contents: read
       id-token: write
@@ -100,7 +100,7 @@ jobs:
       - id: install
         uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
-          version: "v3.19.2"
+          version: "v3.20.1"
       - id: cloud-auth
         uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -139,7 +139,7 @@ jobs:
       chart: fixture/helm/amazing-app
       release_name: amazing-app
       namespace: gha-ci
-      timeout_minutes: 6
+      timeout_minutes: 8
     secrets: inherit
 
   cleanup-deploy-gcp:
@@ -195,7 +195,7 @@ jobs:
       - id: install
         uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
-          version: "v3.19.2"
+          version: "v3.20.1"
       - id: login-azure
         uses: Azure/login@v3
         with:
