@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.1](https://github.com/entur/gha-helm/compare/v1.4.0...v1.4.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* **deps:** bump azure/aks-set-context from 4 to 5 ([#92](https://github.com/entur/gha-helm/issues/92)) ([d26355d](https://github.com/entur/gha-helm/commit/d26355d9881bb30f35a6d33aa66b50eaa912c5a7))
+* **deps:** bump azure/setup-helm from 4.3.1 to 5.0.0 ([#91](https://github.com/entur/gha-helm/issues/91)) ([24cef2c](https://github.com/entur/gha-helm/commit/24cef2cfbb2538ad2a464e7b38d997d5ec95107b))
+* **deps:** bump helm to version: v3.20.1 ([#96](https://github.com/entur/gha-helm/issues/96)) ([919ec45](https://github.com/entur/gha-helm/commit/919ec45d8d7f4d93e71bb998178e3c3e946a8bcb))
+* gh permissions ([#93](https://github.com/entur/gha-helm/issues/93)) ([499882e](https://github.com/entur/gha-helm/commit/499882e79355de2995c7167c70e68a6966c22296))
+
 ## [1.4.0](https://github.com/entur/gha-helm/compare/v1.3.1...v1.4.0) (2026-03-23)
 
 
