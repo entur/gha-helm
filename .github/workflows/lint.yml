@@ -26,9 +26,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout_minutes }}
     name: Helm lint
     permissions:
-      contents: write
-      id-token: write
-      pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - uses: entur/gha-helm/.github/actions/helm-lint@v1
