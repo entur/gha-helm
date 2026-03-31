@@ -6,6 +6,7 @@ on:
 permissions:
   contents: read
   pull-requests: read # required by entur/gha-meta verify-pr
+  id-token: write # required by deploy.yml for OIDC cloud auth
 
 jobs:
   verify-pr:
