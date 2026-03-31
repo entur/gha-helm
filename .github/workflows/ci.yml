@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read # required by entur/gha-meta verify-pr
 
 jobs:
   verify-pr:
