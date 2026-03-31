@@ -3,6 +3,11 @@ name: Entur/Helm/CI
 on:
   pull_request:
 
+permissions:
+  contents: write # required by entur/gha-meta auto-doc.yml
+  pull-requests: read # required by entur/gha-meta verify-pr
+  id-token: write # required by deploy.yml for OIDC cloud auth
+
 jobs:
   verify-pr:
     name: Verify PR
@@ -50,9 +55,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -89,13 +93,12 @@ jobs:
     environment: dev
     timeout-minutes: 6
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v6
       - id: install
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
           version: "v3.19.2"
       - id: cloud-auth
@@ -146,9 +149,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
@@ -168,9 +170,8 @@ jobs:
     needs: [test-lint-ok-azure]
     uses: ./.github/workflows/deploy.yml
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     concurrency:
       group: ${{ github.head_ref }}-azure
       cancel-in-progress: true
@@ -188,12 +189,11 @@ jobs:
     runs-on: ubuntu-24.04
     environment: az-dev
     permissions:
-      contents: write
+      contents: read
       id-token: write
-      pull-requests: write
     steps:
       - id: install
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
           version: "v3.19.2"
       - id: login-azure

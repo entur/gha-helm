@@ -139,7 +139,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      pull-requests: read
     env:
       GHA_HELM_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       GHA_HELM_DEPLOY_IMAGE: ${{ inputs.image }}
@@ -220,7 +219,7 @@ jobs:
         with:
           ref: ${{ env.GHA_GIT_REF }}
       - id: install
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
           version: "v3.19.2"
       - uses: entur/gha-meta/.github/actions/cloud-auth@v1
