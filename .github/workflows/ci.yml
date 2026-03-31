@@ -209,7 +209,7 @@ jobs:
         with:
           kubelogin-version: "latest"
       - id: set-context-azure
-        uses: azure/aks-set-context@v5
+        uses: azure/aks-set-context@60623acbdcbbdcf799ad50a1adf8703874339f8b # v5.0.0
         with:
           resource-group: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
