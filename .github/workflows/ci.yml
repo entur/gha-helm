@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write # required by entur/gha-meta auto-doc.yml
   pull-requests: read # required by entur/gha-meta verify-pr
   id-token: write # required by deploy.yml for OIDC cloud auth
 
