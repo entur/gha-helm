@@ -12,18 +12,21 @@ permissions:
 jobs:
   verify-pr:
     name: Verify PR
-    if: ${{ github.event_name == 'pull_request' }}
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
   test-lint-ok-gcp:
+    if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/lint.yml
     with:
       environment: dev
       chart: fixture/helm/amazing-app
   test-unittest-ok:
+    if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/unittest.yml
     with:
       chart: fixture/helm/amazing-app-az
   test-lint-ok-multi:
+    if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/lint.yml
     with:
       environment: dev
@@ -51,7 +54,7 @@ jobs:
     secrets: inherit
 
   cleanup-deploy-gcp-multi:
-    if: always()
+    if: always() && needs.test-deploy-ok-gcp-multi.result != 'skipped'
     needs: [test-deploy-ok-gcp-multi]
     runs-on: ubuntu-24.04
     environment: dev
@@ -145,7 +148,7 @@ jobs:
 
   cleanup-deploy-gcp:
     # run regardless of previous job status
-    if: always()
+    if: always() && needs.test-deploy-ok-gcp.result != 'skipped'
     needs: [test-deploy-ok-gcp, test-deploy-gcp-no-image-update]
     runs-on: ubuntu-24.04
     environment: dev
@@ -185,7 +188,7 @@ jobs:
       namespace: ghaci
     secrets: inherit
   cleanup-deploy-azure:
-    if: always()
+    if: always() && needs.test-deploy-ok-azure.result != 'skipped'
     needs: [test-deploy-ok-azure]
     runs-on: ubuntu-24.04
     environment: az-dev
