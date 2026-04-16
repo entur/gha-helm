@@ -8,9 +8,9 @@ updates:
 - package-ecosystem: github-actions
   directory: "/"
   exclude-paths:
-    - /.github/workflows/deploy.yml
-    - /.github/workflows/lint.yml
-    - /.github/workflows/unittest.yml
+    - ".github/workflows/deploy.yml"
+    - ".github/workflows/lint.yml"
+    - ".github/workflows/unittest.yml"
   groups:
     minor-and-patch:
       applies-to: version-updates
