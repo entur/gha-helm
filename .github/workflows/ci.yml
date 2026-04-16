@@ -2,6 +2,7 @@ name: Entur/Helm/CI
 
 on:
   pull_request:
+  workflow_call:
 
 permissions:
   contents: write # required by entur/gha-meta auto-doc.yml
