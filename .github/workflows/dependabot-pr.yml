@@ -1,0 +1,21 @@
+# Dependabot pull request workflow
+#
+# Dependabot PRs do not receive repository secrets by default.
+# This workflow adds an approval gate so secrets are only exposed after a human has reviewed and approved the PR.
+
+name: Entur/Helm/CI/Dependabot
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: read
+  id-token: write
+
+jobs:
+  ci:
+    if: github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
