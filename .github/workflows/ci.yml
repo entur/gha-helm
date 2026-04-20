@@ -13,7 +13,7 @@ jobs:
   verify-pr:
     name: Verify PR
     if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
-    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
+    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1.6.3
   test-lint-ok-gcp:
     if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/lint.yml
@@ -62,13 +62,13 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1.6.3
         with:
           environment: dev
           cloud_provider: gcp
           gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
-      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1.6.3
         with:
           environment: dev
           cloud_provider: gcp
@@ -106,12 +106,12 @@ jobs:
         with:
           version: "v3.20.1"
       - id: cloud-auth
-        uses: entur/gha-meta/.github/actions/cloud-auth@v1
+        uses: entur/gha-meta/.github/actions/cloud-auth@v1.6.3
         with:
           environment: dev
           gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
-      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1.6.3
         with:
           environment: dev
       - id: helm-deploy
@@ -156,13 +156,13 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1.6.3
         with:
           environment: dev
           cloud_provider: gcp
           gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
-      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1.6.3
         with:
           environment: dev
           cloud_provider: gcp
@@ -234,21 +234,21 @@ jobs:
         test-deploy-gcp-no-image-update,
         test-deploy-ok-gcp-multi,
       ]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.6.3
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
   update-build-doc:
     if: (success() || failure()) && needs.update-lint-doc.result == 'success'
     needs: [update-lint-doc]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.6.3
     with:
       workflow_file: .github/workflows/deploy.yml
       readme_file: README-deploy.md
   update-unittest-doc:
     if: (success() || failure()) && needs.update-build-doc.result == 'success'
     needs: [update-build-doc]
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1.6.3
     with:
       workflow_file: .github/workflows/unittest.yml
       readme_file: README-unittest.md
