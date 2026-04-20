@@ -4,10 +4,10 @@ description: A fixture chart for multi-app deploy with aliased common dependenci
 version: 0.0.1
 dependencies:
   - name: common
-    version: 1.19.0
+    version: 1.21.1
     repository: "https://entur.github.io/helm-charts"
     alias: multi-1
   - name: common
-    version: 1.19.0
+    version: 1.21.1
     repository: "https://entur.github.io/helm-charts"
     alias: multi-2

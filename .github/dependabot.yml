@@ -5,42 +5,57 @@
 
 version: 2
 updates:
-- package-ecosystem: github-actions
-  directory: "/"
-  exclude-paths:
-    - ".github/workflows/deploy.yml"
-    - ".github/workflows/lint.yml"
-    - ".github/workflows/unittest.yml"
-  groups:
-    minor-and-patch:
-      applies-to: version-updates
-      update-types:
-        - "minor"
-        - "patch"
-  schedule:
-    interval: "weekly"
-    time: "09:00"
-    timezone: "Europe/Oslo"
-    day: "monday"
-  cooldown:
-    default-days: 7
-- package-ecosystem: github-actions
-  directories:
-    - "/.github/workflows/deploy.yml"
-    - "/.github/workflows/lint.yml"
-    - "/.github/workflows/unittest.yml"
-  groups:
-    minor-and-patch:
-      applies-to: version-updates
-      update-types:
-        - "minor"
-        - "patch"
-  schedule:
-    interval: "weekly"
-    time: "09:00"
-    timezone: "Europe/Oslo"
-    day: "monday"
-  cooldown:
-    default-days: 7
-  commit-message:
-    prefix: "fix(deps):" # trigger new release when updating user-facing workflows
+  - package-ecosystem: github-actions
+    directory: "/"
+    exclude-paths:
+      - ".github/workflows/deploy.yml"
+      - ".github/workflows/lint.yml"
+      - ".github/workflows/unittest.yml"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    schedule:
+      interval: "weekly"
+      time: "09:00"
+      timezone: "Europe/Oslo"
+      day: "monday"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: github-actions
+    directories:
+      - "/.github/workflows/deploy.yml"
+      - "/.github/workflows/lint.yml"
+      - "/.github/workflows/unittest.yml"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    schedule:
+      interval: "weekly"
+      time: "09:00"
+      timezone: "Europe/Oslo"
+      day: "monday"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "fix(deps):" # trigger new release when updating user-facing workflows
+  - package-ecosystem: helm
+    directory: "/"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    schedule:
+      interval: "weekly"
+      time: "09:00"
+      timezone: "Europe/Oslo"
+      day: "monday"
+    cooldown:
+      default-days: 7
