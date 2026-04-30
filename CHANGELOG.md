@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/entur/gha-helm/compare/v1.5.1...v1.5.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* don't pin our own actions to commits ([#110](https://github.com/entur/gha-helm/issues/110)) ([51ccb1e](https://github.com/entur/gha-helm/commit/51ccb1e08efc521b70b913a8c8907397fba8ce7f))
+
 ## [1.5.1](https://github.com/entur/gha-helm/compare/v1.5.0...v1.5.1) (2026-04-30)
 
 
