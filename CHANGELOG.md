@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/entur/gha-helm/compare/v1.4.1...v1.5.0) (2026-04-30)
+
+
+### Features
+
+* **helm-deploy:** Send action analytics to PostHog ([#104](https://github.com/entur/gha-helm/issues/104)) ([28ad5d7](https://github.com/entur/gha-helm/commit/28ad5d7e27bd01ba6b482a2c5c225414b2cf6aea))
+* **helm-lint:** Send action analytics to PostHog ([#106](https://github.com/entur/gha-helm/issues/106)) ([40118c1](https://github.com/entur/gha-helm/commit/40118c1d83bb5d5b921cdfe1f79119cf1d73b055))
+
 ## [1.4.1](https://github.com/entur/gha-helm/compare/v1.4.0...v1.4.1) (2026-03-31)
 
 
