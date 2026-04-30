@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/entur/gha-helm/compare/v1.5.0...v1.5.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* move posthog step to workflow ([#108](https://github.com/entur/gha-helm/issues/108)) ([e64f5f7](https://github.com/entur/gha-helm/commit/e64f5f7340d5b82eea4ea63e53691b559f0f5684))
+
 ## [1.5.0](https://github.com/entur/gha-helm/compare/v1.4.1...v1.5.0) (2026-04-30)
 
 
