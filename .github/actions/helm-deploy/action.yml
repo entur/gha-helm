@@ -114,7 +114,7 @@ runs:
       uses: entur/gha-meta/.github/actions/posthog@e27fa4579248d4792b933ef0d0f240346676a25d # 1.8.0
       if: always()
       with:
-        api_key:         "phc_orBSekQBqvfr25mZreA9k5Yq5oYGh3XYKpW9ocuffFYY"
+        api_key:         ${{ vars.ENTUR_PLATTFORM_POSTHOG_API }}
         gha_repository:  entur/gha-helm # This must be hardcoded to the repository where the workflow is defined.
         workflow_inputs: ${{ toJSON(inputs) }}
         workflow_name:   helm-deploy
