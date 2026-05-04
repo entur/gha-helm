@@ -27,6 +27,7 @@ jobs:
     name: Helm lint
     permissions:
       contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v6
       - uses: entur/gha-helm/.github/actions/helm-lint@v1

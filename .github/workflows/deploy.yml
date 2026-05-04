@@ -139,6 +139,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      actions: read
     env:
       GHA_HELM_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       GHA_HELM_DEPLOY_IMAGE: ${{ inputs.image }}
