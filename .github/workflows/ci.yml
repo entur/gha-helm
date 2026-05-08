@@ -31,6 +31,12 @@ jobs:
     with:
       environment: dev
       chart: fixture/helm/amazing-app-multi
+  test-lint-ok-containers:
+    if: github.actor != 'dependabot[bot]'
+    uses: ./.github/workflows/lint.yml
+    with:
+      environment: dev
+      chart: fixture/helm/amazing-app-containers
   test-lint-ok-azure:
     needs: [test-unittest-ok]
     uses: ./.github/workflows/lint.yml
@@ -76,6 +82,44 @@ jobs:
         run: |
           helm uninstall amazing-app-multi -n gha-ci || true
 
+  test-deploy-ok-gcp-containers:
+    needs: [test-lint-ok-containers]
+    uses: ./.github/workflows/deploy.yml
+    concurrency:
+      group: ${{ github.head_ref }}-gcp-containers
+      cancel-in-progress: true
+    with:
+      environment: dev
+      image: getting-started:latest
+      chart: fixture/helm/amazing-app-containers
+      release_name: amazing-app-containers
+      namespace: gha-ci
+      container_name: "app"
+    secrets: inherit
+
+  cleanup-deploy-gcp-containers:
+    if: always() && needs.test-deploy-ok-gcp-containers.result != 'skipped'
+    needs: [test-deploy-ok-gcp-containers]
+    runs-on: ubuntu-24.04
+    environment: dev
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: entur/gha-meta/.github/actions/cloud-auth@v1
+        with:
+          environment: dev
+          cloud_provider: gcp
+          gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+        with:
+          environment: dev
+          cloud_provider: gcp
+      - id: clean
+        run: |
+          helm uninstall amazing-app-containers -n gha-ci || true
+
   test-deploy-ok-gcp:
     needs: [test-lint-ok-gcp]
     uses: ./.github/workflows/deploy.yml
@@ -116,7 +160,7 @@ jobs:
           environment: dev
       - id: helm-deploy
         continue-on-error: true
-        uses: entur/gha-helm/.github/actions/helm-deploy@v1
+        uses: ./.github/actions/helm-deploy
         with:
           timeout_minutes: 6
           image: mybadimage:dummy
@@ -223,16 +267,18 @@ jobs:
         run: |
           helm uninstall amazing-app -n ghaci
   update-lint-doc:
-    # run only if test-deploy-ok-azure, test-deploy-gcp-no-image-update, and test-deploy-ok-gcp-multi are successful, but ignore rollback failure
-    if: (success() || failure()) && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success' && needs.test-deploy-ok-gcp-multi.result == 'success'
+    # run only if all deploy tests are successful, but ignore rollback failure
+    if: (success() || failure()) && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success' && needs.test-deploy-ok-gcp-multi.result == 'success' && needs.test-deploy-ok-gcp-containers.result == 'success'
     needs:
       [
         cleanup-deploy-azure,
         cleanup-deploy-gcp,
         cleanup-deploy-gcp-multi,
+        cleanup-deploy-gcp-containers,
         test-deploy-ok-azure,
         test-deploy-gcp-no-image-update,
         test-deploy-ok-gcp-multi,
+        test-deploy-ok-gcp-containers,
       ]
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
