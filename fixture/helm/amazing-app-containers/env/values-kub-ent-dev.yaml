@@ -1,1 +1,4 @@
-# Environment-specific overrides for dev
+common:
+  env: dev
+  ingress:
+    host: amazing-app-containers.dev.entur.io
