@@ -87,10 +87,9 @@ runs:
             exit 1
           fi
 
-          SET_PATH="${CONTAINERS_PATH}[${INDEX}].image"
           FULL_IMAGE="${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}"
           echo "Setting container '${GHA_HELM_DEPLOY_CONTAINER_NAME}' (index ${INDEX}) image to: ${FULL_IMAGE}"
-          IMAGE_REPLACE_ARG+=("--set" "${SET_PATH}=${FULL_IMAGE}")
+          yq eval ".${CONTAINERS_PATH}[${INDEX}].image = \"${FULL_IMAGE}\"" -i "${VALUES_FILE}"
         elif [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
           # --- Path-based image replacement (existing behavior) ---
           echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
