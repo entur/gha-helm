@@ -8,16 +8,32 @@ common:
     - name: app
       uid: 101
       image: nginxinc/nginx-unprivileged:stable-alpine
+      ports:
+        - containerPort: 8080
+          protocol: TCP
       probes:
+        enabled: true
         liveness:
           path: /
+          port: 8080
         readiness:
           path: /
+          port: 8080
+        startup:
+          port: 8080
     - name: sidecar
       uid: 101
       image: nginxinc/nginx-unprivileged:stable-alpine
+      ports:
+        - containerPort: 9090
+          protocol: TCP
       probes:
+        enabled: true
         liveness:
           path: /
+          port: 9090
         readiness:
           path: /
+          port: 9090
+        startup:
+          port: 9090
