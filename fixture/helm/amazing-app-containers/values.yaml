@@ -1,0 +1,23 @@
+common:
+  app: amazing-app-containers
+  shortname: amazecon
+  team: example
+  ingress:
+    trafficType: public
+  containers:
+    - name: app
+      uid: 101
+      image: nginxinc/nginx-unprivileged:stable-alpine
+      probes:
+        liveness:
+          path: /
+        readiness:
+          path: /
+    - name: sidecar
+      uid: 101
+      image: nginxinc/nginx-unprivileged:stable-alpine
+      probes:
+        liveness:
+          path: /
+        readiness:
+          path: /

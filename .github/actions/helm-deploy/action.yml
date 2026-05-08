@@ -21,8 +21,12 @@ inputs:
     description: "The namespace to use, defaults to repository name"
     default: "repo_name"
   image_set_path:
-    description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image'."
+    description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image'. Ignored when container_name is set."
     default: "common.container.image"
+  container_name:
+    description: "Replace the image of a named container in the common.containers array. Resolves the array index automatically."
+    required: false
+    default: ""
   registry:
     description: "Container registry prefix"
     default: "eu.gcr.io/entur-system-1287"
@@ -44,6 +48,7 @@ runs:
         GHA_HELM_DEPLOY_VALUES: ${{ inputs.values }}
         GHA_HELM_DEPLOY_NAMESPACE: ${{ inputs.namespace }}
         GHA_HELM_DEPLOY_IMAGE_SET_PATH: ${{ inputs.image_set_path }}
+        GHA_HELM_DEPLOY_CONTAINER_NAME: ${{ inputs.container_name }}
         GHA_HELM_DEPLOY_REGISTRY: ${{ inputs.registry }}
       shell: bash
       run: |
@@ -54,7 +59,40 @@ runs:
         fi
         helm dependency update ./${GHA_HELM_DEPLOY_CHART}
         declare -a IMAGE_REPLACE_ARG
-        if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
+        if [ -n "${GHA_HELM_DEPLOY_CONTAINER_NAME}" ]; then
+          # --- Name-based container image replacement ---
+          if [ "${GHA_HELM_DEPLOY_IMAGE}" == "na" ] || [ -z "${GHA_HELM_DEPLOY_IMAGE}" ]; then
+            echo "::error::container_name requires a valid 'image' input, but got '${GHA_HELM_DEPLOY_IMAGE}'."
+            exit 1
+          fi
+          VALUES_FILE="./${GHA_HELM_DEPLOY_CHART}/values.yaml"
+          if [ ! -f "${VALUES_FILE}" ]; then
+            echo "::error::Chart values file not found: ${VALUES_FILE}"
+            exit 1
+          fi
+          if ! command -v yq &> /dev/null; then
+            echo "::error::yq is required for container_name but was not found on this runner"
+            exit 1
+          fi
+          if [[ ! "${GHA_HELM_DEPLOY_CONTAINER_NAME}" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$ ]]; then
+            echo "::error::Invalid container_name: '${GHA_HELM_DEPLOY_CONTAINER_NAME}'. Must be a lowercase DNS label (a-z, 0-9, hyphens)."
+            exit 1
+          fi
+
+          CONTAINERS_PATH="common.containers"
+          INDEX=$(yq eval ".${CONTAINERS_PATH} | to_entries | .[] | select(.value.name == \"${GHA_HELM_DEPLOY_CONTAINER_NAME}\") | .key" "${VALUES_FILE}")
+
+          if [ -z "${INDEX}" ]; then
+            echo "::error::Container '${GHA_HELM_DEPLOY_CONTAINER_NAME}' not found in '${CONTAINERS_PATH}' in ${VALUES_FILE}"
+            exit 1
+          fi
+
+          SET_PATH="${CONTAINERS_PATH}[${INDEX}].image"
+          FULL_IMAGE="${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}"
+          echo "Setting container '${GHA_HELM_DEPLOY_CONTAINER_NAME}' (index ${INDEX}) image to: ${FULL_IMAGE}"
+          IMAGE_REPLACE_ARG+=("--set" "${SET_PATH}=${FULL_IMAGE}")
+        elif [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
+          # --- Path-based image replacement (existing behavior) ---
           echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
           IFS=',' read -ra PATHS <<< "${GHA_HELM_DEPLOY_IMAGE_SET_PATH}"
           for path in "${PATHS[@]}"; do
