@@ -160,7 +160,7 @@ jobs:
           environment: dev
       - id: helm-deploy
         continue-on-error: true
-        uses: entur/gha-helm/.github/actions/helm-deploy@v1
+        uses: ./.github/actions/helm-deploy
         with:
           timeout_minutes: 6
           image: mybadimage:dummy
