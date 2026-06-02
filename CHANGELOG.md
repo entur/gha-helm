@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/entur/gha-helm/compare/v1.5.2...v1.6.0) (2026-06-02)
+
+
+### Features
+
+* add container_name input for name-based image replacement ([#114](https://github.com/entur/gha-helm/issues/114)) ([aa4b239](https://github.com/entur/gha-helm/commit/aa4b239e7349229258ced4dcd8a5cd9fb245a9cd))
+
 ## [1.5.2](https://github.com/entur/gha-helm/compare/v1.5.1...v1.5.2) (2026-04-30)
 
 
