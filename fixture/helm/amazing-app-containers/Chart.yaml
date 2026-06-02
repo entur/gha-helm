@@ -1,0 +1,8 @@
+apiVersion: v2
+name: amazing-app-containers
+description: A fixture chart for testing name-based container image replacement
+version: 0.0.1
+dependencies:
+  - name: common
+    version: 1.21.1
+    repository: "https://entur.github.io/helm-charts"
