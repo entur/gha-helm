@@ -47,7 +47,7 @@ on:
         type: number
         default: 30
       image_set_path:
-        description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image' - or when using 3rd party charts. The default is skipped when container_name is set; set explicitly to use both."
+        description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image' - or when using 3rd party charts. When container_name is set, the default value is skipped; provide a non-default path here to run both mechanisms."
         type: string
         default: "common.container.image"
       container_name:

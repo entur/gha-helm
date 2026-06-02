@@ -21,7 +21,7 @@ inputs:
     description: "The namespace to use, defaults to repository name"
     default: "repo_name"
   image_set_path:
-    description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image'. The default is skipped when container_name is set; set explicitly to use both."
+    description: "Comma-separated Helm values path(s) for the container image. Override when using aliased common chart dependencies (multi-app deploy), e.g. 'multi-1.container.image,multi-2.container.image'. When container_name is set, the default value is skipped; provide a non-default path here to run both mechanisms."
     default: "common.container.image"
   container_name:
     description: "Replace the image of a named container in the common.containers array. Resolves the array index automatically."
@@ -41,7 +41,6 @@ runs:
       name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
       env:
         TIMEOUT: ${{ inputs.timeout_minutes }}
-        GHA_HELM_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
         GHA_HELM_DEPLOY_IMAGE: ${{ inputs.image }}
         GHA_HELM_DEPLOY_RELEASE_NAME: ${{ inputs.release_name }}
         GHA_HELM_DEPLOY_CHART: ${{ inputs.chart }}
@@ -80,10 +79,24 @@ runs:
           fi
 
           CONTAINERS_PATH="common.containers"
+          CONTAINERS_TYPE=$(yq eval ".${CONTAINERS_PATH} | type" "${VALUES_FILE}")
+          if [ "${CONTAINERS_TYPE}" != "!!seq" ]; then
+            echo "::error::'${CONTAINERS_PATH}' in ${VALUES_FILE} is not a sequence (got '${CONTAINERS_TYPE}')."
+            exit 1
+          fi
           INDEX=$(yq eval ".${CONTAINERS_PATH} | to_entries | .[] | select(.value.name == \"${GHA_HELM_DEPLOY_CONTAINER_NAME}\") | .key" "${VALUES_FILE}")
 
           if [ -z "${INDEX}" ]; then
             echo "::error::Container '${GHA_HELM_DEPLOY_CONTAINER_NAME}' not found in '${CONTAINERS_PATH}' in ${VALUES_FILE}"
+            exit 1
+          fi
+          MATCH_COUNT=$(printf '%s\n' "${INDEX}" | wc -l | tr -d ' ')
+          if [ "${MATCH_COUNT}" != "1" ]; then
+            echo "::error::Container name '${GHA_HELM_DEPLOY_CONTAINER_NAME}' matched ${MATCH_COUNT} entries in '${CONTAINERS_PATH}'; names must be unique."
+            exit 1
+          fi
+          if [[ ! "${INDEX}" =~ ^[0-9]+$ ]]; then
+            echo "::error::Resolved index '${INDEX}' for container '${GHA_HELM_DEPLOY_CONTAINER_NAME}' is not numeric."
             exit 1
           fi
 
