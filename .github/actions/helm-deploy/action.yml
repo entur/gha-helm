@@ -162,32 +162,11 @@ runs:
             exit 1
           fi
         fi
-    # Rolls back the Helm release if the job is cancelled during deployment and a previous release exists
     - id: helm-rollback-on-cancel
       name: Helm rollback on cancellation
       if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
-      env:
-        TIMEOUT: ${{ inputs.timeout_minutes }}
-        GHA_HELM_DEPLOY_RELEASE_NAME: ${{ inputs.release_name }}
-        GHA_HELM_DEPLOY_NAMESPACE: ${{ inputs.namespace }}
-      shell: bash
-      run: |
-        TIMEOUT=$((TIMEOUT/2-2))
-        if (( TIMEOUT < 1 )); then TIMEOUT=1; fi
-        if (( TIMEOUT > 4 )); then TIMEOUT=4; fi
-        if helm list --all -n "${GHA_HELM_DEPLOY_NAMESPACE}" --filter "^${GHA_HELM_DEPLOY_RELEASE_NAME}$" --short | grep -q .; then
-          echo "#################################################################################################"
-          echo " Job cancelled. Rolling back Helm release '${GHA_HELM_DEPLOY_RELEASE_NAME}'..."
-          echo "#################################################################################################"
-          if helm rollback "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug; then
-            echo "#################################################################################################"
-            echo " Helm rollback on cancellation successful."
-            echo "#################################################################################################"
-          else
-            echo "#################################################################################################"
-            echo " Helm rollback on cancellation failed. Please investigate manually."
-            echo "#################################################################################################"
-          fi
-        else
-          echo "No existing Helm release found for '${GHA_HELM_DEPLOY_RELEASE_NAME}' in '${GHA_HELM_DEPLOY_NAMESPACE}'. Nothing to roll back."
-        fi
+      uses: ./.github/actions/helm-rollback-on-cancel
+      with:
+        release_name: ${{ inputs.release_name }}
+        namespace: ${{ inputs.namespace }}
+        timeout_minutes: ${{ inputs.timeout_minutes }}
