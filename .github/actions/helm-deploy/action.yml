@@ -162,11 +162,3 @@ runs:
             exit 1
           fi
         fi
-    - id: helm-rollback-on-cancel
-      name: Helm rollback on cancellation
-      if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
-      uses: ./.github/actions/helm-rollback-on-cancel
-      with:
-        release_name: ${{ inputs.release_name }}
-        namespace: ${{ inputs.namespace }}
-        timeout_minutes: ${{ inputs.timeout_minutes }}
