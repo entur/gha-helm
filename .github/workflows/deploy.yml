@@ -265,7 +265,7 @@ jobs:
       - id: helm-rollback-on-cancel
         name: Helm rollback on cancellation
         if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
-        uses: entur/gha-helm/.github/actions/helm-rollback-on-cancel@v1
+        uses: ./.github/actions/helm-rollback-on-cancel
         with:
           release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
           namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
