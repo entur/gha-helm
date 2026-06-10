@@ -1,0 +1,41 @@
+name: Entur/Helm/Rollback-On-Cancel
+description: Rolls back the Helm release if the job is canceled during deployment and a pending rollout exists
+inputs:
+  release_name:
+    description: "The release name"
+    required: true
+  namespace:
+    description: "The Kubernetes namespace"
+    required: true
+  timeout_minutes:
+    description: "Job timeout in minutes (same value as helm-deploy)."
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        TIMEOUT: ${{ inputs.timeout_minutes }}
+        RELEASE_NAME: ${{ inputs.release_name }}
+        NAMESPACE: ${{ inputs.namespace }}
+      run: |
+        TIMEOUT=$((TIMEOUT/2-2))
+        if (( TIMEOUT < 1 )); then TIMEOUT=1; fi
+        if (( TIMEOUT > 4 )); then TIMEOUT=4; fi
+        if helm list --pending -n "${NAMESPACE}" --filter "^${RELEASE_NAME}$" --short | grep -q .; then
+          echo "#################################################################################################"
+          echo " Job cancelled. Rolling back Helm release '${RELEASE_NAME}'..."
+          echo "#################################################################################################"
+          if helm rollback "${RELEASE_NAME}" --namespace "${NAMESPACE}" --wait --timeout "${TIMEOUT}m0s" --debug; then
+            echo "#################################################################################################"
+            echo " Helm rollback on cancellation successful."
+            echo "#################################################################################################"
+          else
+            echo "#################################################################################################"
+            echo " Helm rollback on cancellation failed. Please investigate manually."
+            echo "#################################################################################################"
+            exit 1
+          fi
+        else
+          echo "No active rollout found for '${RELEASE_NAME}' in '${NAMESPACE}'. Nothing to roll back."
+        fi

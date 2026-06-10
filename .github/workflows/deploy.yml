@@ -260,6 +260,16 @@ jobs:
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
           container_name: ${{ env.GHA_HELM_DEPLOY_CONTAINER_NAME }}
           registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
+      # Helm rollback on workflow cancellation, only trigger if user cancels during deployment and the deployment
+      # has not succeeded, to avoid rolling back a successful deployment in case of cancel after rollout completion.
+      - id: helm-rollback-on-cancel
+        name: Helm rollback on cancellation
+        if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
+        uses: ./.github/actions/helm-rollback-on-cancel
+        with:
+          release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
+          timeout_minutes: ${{ inputs.timeout_minutes }}
       - uses: entur/gha-meta/.github/actions/posthog@v1
         id: send-analytics
         name: Send analytics to PostHog
