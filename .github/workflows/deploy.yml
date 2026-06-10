@@ -299,6 +299,15 @@ jobs:
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
           container_name: ${{ env.GHA_HELM_DEPLOY_CONTAINER_NAME }}
           registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
+      # Helm rollback on workflow cancellation and the deployment is not already finished (status 0)
+      - id: helm-rollback-on-cancel
+        name: Helm rollback on cancellation
+        if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
+        uses: entur/gha-helm/.github/actions/helm-rollback-on-cancel@feat/rollback-on-workflow-cancel # TODO Change to v1
+        with:
+          release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
+          namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
+          timeout_minutes: ${{ inputs.timeout_minutes }}
       - id: record-end
         name: Record deployment end time
         if: always()
