@@ -68,13 +68,16 @@ on:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
         value: ${{ jobs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
 jobs:
+  # Posts the "Approval Needed" Slack message. This must be a separate job:
+  # the environment approval gate on helm-deploy blocks its steps from
+  # starting, so a pre-approval notification can never run inside it.
   slack-pending:
     if: inputs.slack_channel_id != ''
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    timeout-minutes: 5
+    continue-on-error: true
     outputs:
-      message: ${{ steps.build-message.outputs.message }}
-      blocks: ${{ steps.build-message.outputs.blocks }}
+      message_ts: ${{ steps.slack-post.outputs.message_ts }}
     steps:
       - id: check-approval
         name: check if environment has approval gate
@@ -127,16 +130,22 @@ jobs:
           echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
           echo "$BLOCKS" >> "$GITHUB_OUTPUT"
           echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
-  slack-pending-notify:
-    if: needs.slack-pending.outputs.message != ''
-    needs: [slack-pending]
-    uses: entur/gha-slack/.github/workflows/post.yml@v3
-    with:
-      channel_id: ${{ inputs.slack_channel_id }}
-      message: ${{ needs.slack-pending.outputs.message }}
-      blocks: ${{ needs.slack-pending.outputs.blocks }}
-    secrets: inherit
+      - id: slack-post
+        name: Post approval message to Slack
+        if: steps.check-approval.outputs.has_approval_gate == 'true'
+        timeout-minutes: 1
+        uses: entur/gha-slack/.github/actions/post@v3
+        with:
+          channel_id: ${{ inputs.slack_channel_id }}
+          message: ${{ steps.build-message.outputs.message }}
+          blocks: ${{ steps.build-message.outputs.blocks }}
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
   helm-deploy:
+    needs: [slack-pending]
+    # !cancelled() (not the default success()) is required: slack-pending is
+    # skipped when Slack is disabled, and a skipped needed job would otherwise
+    # skip this job too — breaking every deploy without slack_channel_id.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ inputs.timeout_minutes }}
     name: Helm deploy
@@ -171,6 +180,19 @@ jobs:
     outputs:
       HELM_DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
     steps:
+      # This job only starts once the environment approval gate (if any) has
+      # been passed, so reaching this step means the deployment was approved.
+      - id: slack-approved-react
+        name: React to Slack approval message
+        if: needs.slack-pending.outputs.message_ts != ''
+        continue-on-error: true
+        timeout-minutes: 1
+        uses: entur/gha-slack/.github/actions/react@v3
+        with:
+          channel_id: ${{ inputs.slack_channel_id }}
+          message_ts: ${{ needs.slack-pending.outputs.message_ts }}
+          emoji: white_check_mark
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
       - id: verify-cloud-provider
         if: env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'gcp' && env.GHA_HELM_DEPLOY_CLOUD_PROVIDER != 'az'
         shell: bash
@@ -260,28 +282,13 @@ jobs:
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
           container_name: ${{ env.GHA_HELM_DEPLOY_CONTAINER_NAME }}
           registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
-      - uses: entur/gha-meta/.github/actions/posthog@v1
-        id: send-analytics
-        name: Send analytics to PostHog
-        if: always()
-        with:
-          api_key:         ${{ vars.POSTHOG_API_TOKEN_PLATTFORM }}
-          gha_repository:  entur/gha-helm # This must be hardcoded to the repository where the workflow is defined.
-          workflow_inputs: ${{ toJSON(inputs) }}
-          workflow_name:   helm-deploy
-  prepare-slack:
-    if: always() && inputs.slack_channel_id != ''
-    needs: [helm-deploy]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    outputs:
-      message: ${{ steps.build-message.outputs.message }}
-      blocks: ${{ steps.build-message.outputs.blocks }}
-    steps:
-      - id: build-message
+      - id: build-slack-message
+        name: Build Slack deploy status message
+        if: always() && inputs.slack_channel_id != ''
+        continue-on-error: true
         shell: bash
         env:
-          DEPLOY_STATUS: ${{ needs.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+          DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
           REPOSITORY: ${{ github.repository }}
           ENVIRONMENT: ${{ inputs.environment }}
           IMAGE: ${{ inputs.image }}
@@ -343,26 +350,33 @@ jobs:
           echo "blocks<<GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
           echo "$BLOCKS" >> "$GITHUB_OUTPUT"
           echo "GHA_SLACK_BLOCKS_EOF" >> "$GITHUB_OUTPUT"
-  slack-notify:
-    if: always() && inputs.slack_channel_id != '' && needs.prepare-slack.outputs.message != ''
-    needs: [prepare-slack]
-    uses: entur/gha-slack/.github/workflows/post.yml@v3
-    with:
-      channel_id: ${{ inputs.slack_channel_id }}
-      message: ${{ needs.prepare-slack.outputs.message }}
-      blocks: ${{ needs.prepare-slack.outputs.blocks }}
-    secrets: inherit
-  slack-approved-react:
-    if: >-
-      always() &&
-      inputs.slack_channel_id != '' &&
-      needs.slack-pending-notify.result == 'success' &&
-      needs.helm-deploy.result != 'cancelled' &&
-      needs.helm-deploy.result != 'skipped'
-    needs: [slack-pending-notify, helm-deploy]
-    uses: entur/gha-slack/.github/workflows/react.yml@v3
-    with:
-      channel_id: ${{ inputs.slack_channel_id }}
-      message_ts: ${{ needs.slack-pending-notify.outputs.message_ts }}
-      emoji: white_check_mark
-    secrets: inherit
+      - id: slack-notify
+        name: Post deploy status to Slack
+        if: always() && steps.build-slack-message.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 1
+        uses: entur/gha-slack/.github/actions/post@v3
+        with:
+          channel_id: ${{ inputs.slack_channel_id }}
+          message: ${{ steps.build-slack-message.outputs.message }}
+          blocks: ${{ steps.build-slack-message.outputs.blocks }}
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: Warn if Slack notification was not delivered
+        if: >-
+          always() && inputs.slack_channel_id != '' &&
+          (steps.slack-approved-react.outcome == 'failure' ||
+           steps.build-slack-message.outcome == 'failure' ||
+           steps.slack-notify.outcome == 'failure' ||
+           (steps.slack-notify.outcome == 'success' && steps.slack-notify.outputs.message_ts == ''))
+        shell: bash
+        run: |
+          echo "::warning::Slack notification failed or was not delivered — check slack_channel_id, that the workflow is called with 'secrets: inherit', and that the Slack bot is invited to the channel."
+      - uses: entur/gha-meta/.github/actions/posthog@v1
+        id: send-analytics
+        name: Send analytics to PostHog
+        if: always()
+        with:
+          api_key:         ${{ vars.POSTHOG_API_TOKEN_PLATTFORM }}
+          gha_repository:  entur/gha-helm # This must be hardcoded to the repository where the workflow is defined.
+          workflow_inputs: ${{ toJSON(inputs) }}
+          workflow_name:   helm-deploy
