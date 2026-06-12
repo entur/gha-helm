@@ -4,6 +4,13 @@ common:
   team: example
   ingress:
     trafficType: public
+  # The common chart's pod securityContext reads container.uid (singular) even
+  # when the containers array is used — uid inside containers[] entries is
+  # ignored (common chart 1.21.1, deployment.yaml:136). Without this the pod
+  # runs as the default uid 1000 and the CI image (getting-started:latest)
+  # crash-loops with a /var/cache/nginx permission error.
+  container:
+    uid: 101
   containers:
     - name: app
       uid: 101
