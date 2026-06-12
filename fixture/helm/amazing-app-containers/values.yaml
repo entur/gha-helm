@@ -4,6 +4,14 @@ common:
   team: example
   ingress:
     trafficType: public
+  # Before common v2.0.0 the pod securityContext read only container.uid
+  # (singular); uid on containers[] entries was ignored, so the pod ran as the
+  # default uid 1000 and getting-started:latest crash-loops as 1000 (a
+  # /var/cache/nginx permission error). containers[].uid is honored from
+  # v2.0.0 on — remove this container.uid once this fixture's common dependency
+  # is bumped to a release that includes that fix.
+  container:
+    uid: 101
   containers:
     - name: app
       uid: 101
