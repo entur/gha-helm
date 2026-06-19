@@ -159,6 +159,7 @@ jobs:
           environment: dev
       - name: Put release in pending-upgrade state
         run: |
+          helm dependency update ./fixture/helm/amazing-app
           helm upgrade amazing-app ./fixture/helm/amazing-app \
             -f fixture/helm/amazing-app/env/values-kub-ent-dev.yaml \
             --namespace gha-ci --install --wait --timeout 10m \
