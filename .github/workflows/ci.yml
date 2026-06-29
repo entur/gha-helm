@@ -135,7 +135,7 @@ jobs:
       slack_channel_id: GFBL95A0J # sandbox-channel
     secrets: inherit
 
-  test-deploy-gcp-with-failed-rollback:
+  test-deploy-gcp-with-rollback:
     needs: [test-deploy-ok-gcp]
     runs-on: ubuntu-24.04
     environment: dev
@@ -166,17 +166,23 @@ jobs:
           image: mybadimage:dummy
           release_name: amazing-app
           chart: fixture/helm/amazing-app
+          # Calling the composite action directly bypasses deploy.yml's
+          # set-values-file step, so resolve the dev values file explicitly.
+          # Without this the deploy fails on a missing values file instead of
+          # the bad image, so no failed revision is created and the rollback
+          # is non-deterministic (status 2 vs 3) depending on leftover state.
+          values: values-kub-ent-dev.yaml
           namespace: gha-ci
       - name: Check if rollback did succeed
-        if: steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '3'
+        if: steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '2'
         uses: actions/github-script@v9
         with:
           script: |
-            core.setFailed('Rollback should fail.')
+            core.setFailed('Rollback did not succeed.')
 
   test-deploy-gcp-no-image-update:
-    if: (success() || failure()) && needs.test-deploy-gcp-with-failed-rollback.result == 'success'
-    needs: [test-deploy-gcp-with-failed-rollback]
+    if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
+    needs: [test-deploy-gcp-with-rollback]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
@@ -212,7 +218,7 @@ jobs:
           cloud_provider: gcp
       - id: clean
         run: |
-          helm uninstall amazing-app -n gha-ci
+          helm uninstall amazing-app -n gha-ci --ignore-not-found
 
   test-deploy-ok-azure:
     needs: [test-lint-ok-azure]
