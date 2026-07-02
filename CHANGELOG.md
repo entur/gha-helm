@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/entur/gha-helm/compare/v1.6.0...v1.6.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* collapse Slack notification jobs into helm-deploy steps ([#120](https://github.com/entur/gha-helm/issues/120)) ([ef73584](https://github.com/entur/gha-helm/commit/ef735849b3aebe0d4d572665e2d5513fb1b04ca5))
+
 ## [1.6.0](https://github.com/entur/gha-helm/compare/v1.5.2...v1.6.0) (2026-06-02)
 
 
