@@ -190,6 +190,8 @@ jobs:
       AZURE_CLUSTER_RESOURCE_GROUP: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
     outputs:
       HELM_DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+      DEPLOY_START_TIME: ${{ steps.record-start.outputs.time }}
+      DEPLOY_END_TIME: ${{ steps.record-end.outputs.time }}
     steps:
       # This job only starts once the environment approval gate (if any) has
       # been passed, so reaching this step means the deployment was approved.
@@ -280,6 +282,10 @@ jobs:
           azure_cluster_resource_group: ${{ env.AZURE_CLUSTER_RESOURCE_GROUP }}
           azure_cluster_name: ${{ env.AZURE_CLUSTER_NAME }}
           azure_token: ${{ secrets.GITHUB_TOKEN }}
+      - id: record-start
+        name: Record deployment start time
+        shell: bash
+        run: echo "time=$(date +%s%3N)" >> "$GITHUB_OUTPUT"
       - id: helm-deploy
         name: Helm deploy ./${{ env.GHA_HELM_DEPLOY_CHART }}
         uses: entur/gha-helm/.github/actions/helm-deploy@v1
@@ -293,6 +299,11 @@ jobs:
           image_set_path: ${{ env.GHA_HELM_DEPLOY_IMAGE_SET_PATH }}
           container_name: ${{ env.GHA_HELM_DEPLOY_CONTAINER_NAME }}
           registry: ${{ env.GHA_HELM_DEPLOY_REGISTRY }}
+      - id: record-end
+        name: Record deployment end time
+        if: always()
+        shell: bash
+        run: echo "time=$(date +%s%3N)" >> "$GITHUB_OUTPUT"
       - id: build-slack-message
         name: Build Slack deploy status message
         if: always() && inputs.slack_channel_id != ''
@@ -391,3 +402,58 @@ jobs:
           gha_repository:  entur/gha-helm # This must be hardcoded to the repository where the workflow is defined.
           workflow_inputs: ${{ toJSON(inputs) }}
           workflow_name:   helm-deploy
+  notify-deployment:
+    # Notify external systems (GitDailies, Grafana Cloud) of a successful deploy.
+    # Driven by org-level config; skipped where the webhook vars are not set.
+    if: >-
+      always() &&
+      needs.helm-deploy.outputs.HELM_DEPLOY_STATUS == '0' &&
+      (vars.GITDAILIES_WEBHOOK_URL != '' || vars.GRAFANA_CLOUD_URL != '')
+    needs: [helm-deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - id: prepare
+        name: Map environment and annotation text
+        shell: bash
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE: ${{ inputs.image }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          # Map gha-helm environments (dev, tst, prd / az-dev, az-test, az-prod)
+          # to the notify-deployment environments (prd, tst, dev, sbx).
+          env_clean="${ENVIRONMENT#az-}"
+          case "$env_clean" in
+            prd|prod) mapped="prd" ;;
+            tst|test) mapped="tst" ;;
+            dev)      mapped="dev" ;;
+            sbx)      mapped="sbx" ;;
+            *)        mapped="$env_clean" ;;
+          esac
+          echo "environment=${mapped}" >> "$GITHUB_OUTPUT"
+
+          # Use the deployed image (name:tag) as the annotation text, unless image
+          # replacement was skipped (image: na), in which case identify by commit.
+          if [[ "$IMAGE" == "na" || -z "$IMAGE" ]]; then
+            echo "annotation_text=deployment of ${REPOSITORY}:${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
+          else
+            echo "annotation_text=${IMAGE}" >> "$GITHUB_OUTPUT"
+          fi
+      - id: notify
+        name: Notify deployment
+        uses: entur/gha-notify-deployment/.github/actions/notify-deployment@v1
+        with:
+          gitdailies-url: ${{ vars.GITDAILIES_WEBHOOK_URL }}
+          gitdailies-key: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+          grafana-url: ${{ vars.GRAFANA_CLOUD_URL }}
+          grafana-key: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
+          repo: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit-sha: ${{ github.sha }}
+          environment: ${{ steps.prepare.outputs.environment }}
+          grafana-annotation-text: ${{ steps.prepare.outputs.annotation_text }}
+          grafana-annotation-tags: ${{ inputs.cloud_provider }}
+          deployment-start-time: ${{ needs.helm-deploy.outputs.DEPLOY_START_TIME }}
+          deployment-end-time: ${{ needs.helm-deploy.outputs.DEPLOY_END_TIME }}
