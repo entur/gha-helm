@@ -17,7 +17,7 @@
 <!-- ⚠️ A breaking change needs a new major version:
      - the PR title must be `type!: ...`, or the description must contain a `BREAKING CHANGE: ...` footer
      - without it, release-please only cuts a patch/minor and consumers get the change silently on `@v1`
-     - after release, update the examples in .github/README.md and README-{lint,deploy,unittest}.md to the new major -->
+     - after release, update the examples in .github/README.md and README-{lint,deploy,unittest}.md to the new major version
 <!-- Remove the section if not relevant -->
 
 ## ✅ Checklist
