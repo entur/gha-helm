@@ -443,6 +443,7 @@ jobs:
           fi
       - id: notify
         name: Notify deployment
+        continue-on-error: true
         uses: entur/gha-notify-deployment/.github/actions/notify-deployment@v1
         with:
           gitdailies-url: ${{ vars.GITDAILIES_WEBHOOK_URL }}
