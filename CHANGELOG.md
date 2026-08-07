@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/entur/gha-helm/compare/v1.6.1...v1.7.0) (2026-08-07)
+
+
+### Features
+
+* notify external systems on successful deploy ([#129](https://github.com/entur/gha-helm/issues/129)) ([b66526e](https://github.com/entur/gha-helm/commit/b66526e89900d1a98f6fca71c56e03adf94263b6))
+
 ## [1.6.1](https://github.com/entur/gha-helm/compare/v1.6.0...v1.6.1) (2026-07-02)
 
 
