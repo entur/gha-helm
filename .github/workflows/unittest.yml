@@ -26,7 +26,7 @@ jobs:
         if: env.GHA_HELM_LINT_CHART == 'default'
         run: |
           echo "GHA_HELM_LINT_CHART=helm/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: install
         uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
