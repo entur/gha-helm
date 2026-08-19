@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/entur/gha-helm/compare/v1.7.0...v2.0.0) (2026-08-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade actions/checkout to version 7 ([#131](https://github.com/entur/gha-helm/issues/131))
+
+### Features
+
+* upgrade actions/checkout to version 7 ([#131](https://github.com/entur/gha-helm/issues/131)) ([f66ab77](https://github.com/entur/gha-helm/commit/f66ab77409a23e59fcccb1729b0bb9d051416955))
+* upgrate actions/checkout to version 7 ([f66ab77](https://github.com/entur/gha-helm/commit/f66ab77409a23e59fcccb1729b0bb9d051416955))
+
 ## [1.7.0](https://github.com/entur/gha-helm/compare/v1.6.1...v1.7.0) (2026-08-07)
 
 
