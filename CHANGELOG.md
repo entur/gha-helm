@@ -6,6 +6,8 @@
 ### ⚠ BREAKING CHANGES
 
 * upgrade actions/checkout to version 7 ([#131](https://github.com/entur/gha-helm/issues/131))
+For most workflows this is not breaking, however if you are using pull_request_target, you need to fix this first.
+See https://github.com/actions/checkout#whats-new for more information
 
 ### Features
 
