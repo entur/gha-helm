@@ -340,8 +340,8 @@ jobs:
               ;;
             *)
               EMOJI=":question:"
-              TITLE="Helm Deploy Status Unknown"
-              STATUS_TEXT="Unknown (status: ${DEPLOY_STATUS:-empty})"
+              TITLE="Helm Deploy not started"
+              STATUS_TEXT="Check pipeline for error messages (status: ${DEPLOY_STATUS:-empty})"
               ;;
           esac
 
