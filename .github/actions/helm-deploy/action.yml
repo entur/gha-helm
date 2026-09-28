@@ -34,6 +34,9 @@ outputs:
   HELM_DEPLOY_STATUS:
     description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
     value: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+  PREVIOUS_REVISION:
+    description: "The release revision before this deploy started, 0 if the release did not exist. Used by helm-rollback-on-cancel."
+    value: ${{ steps.helm-deploy.outputs.PREVIOUS_REVISION }}
 runs:
   using: "composite"
   steps:
@@ -124,6 +127,9 @@ runs:
             done
           fi
         fi
+        # Record the current revision so a cancelled run can identify and undo only its own revision
+        PREVIOUS_REVISION=$(helm status "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" -o json 2>/dev/null | jq -r '.version // 0')
+        echo "PREVIOUS_REVISION=${PREVIOUS_REVISION:-0}" >> "$GITHUB_OUTPUT"
         # Deploy the Helm chart
         if helm upgrade "${GHA_HELM_DEPLOY_RELEASE_NAME}" "./${GHA_HELM_DEPLOY_CHART}" \
           -f "${GHA_HELM_DEPLOY_CHART}/env/${GHA_HELM_DEPLOY_VALUES}" \

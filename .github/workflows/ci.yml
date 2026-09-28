@@ -157,15 +157,17 @@ jobs:
       - uses: entur/gha-meta/.github/actions/k8s-auth@v1
         with:
           environment: dev
-      - name: Put release in pending-upgrade state
+      - id: pending
+        name: Put release in pending-upgrade state
         run: |
+          echo "previous_revision=$(helm status amazing-app -n gha-ci -o json | jq -r '.version')" >> "$GITHUB_OUTPUT"
           helm dependency update ./fixture/helm/amazing-app
           helm upgrade amazing-app ./fixture/helm/amazing-app \
             -f fixture/helm/amazing-app/env/values-kub-ent-dev.yaml \
             --namespace gha-ci --install --wait --timeout 10m \
             --set "common.container.image=eu.gcr.io/entur-system-1287/nonexistent:dummy" &
           HELM_PID=$!
-          for i in $(seq 1 15); do
+          for i in $(seq 1 30); do
             STATUS=$(helm status amazing-app -n gha-ci -o json 2>/dev/null | jq -r '.info.status' 2>/dev/null || echo "")
             [ "$STATUS" = "pending-upgrade" ] && break
             sleep 1
@@ -178,16 +180,22 @@ jobs:
             exit 1
           fi
       - id: rollback-on-cancel
-        uses: entur/gha-helm/.github/actions/helm-rollback-on-cancel@feat/rollback-on-workflow-cancel # TODO Change to v1
+        continue-on-error: true
+        uses: $/.github/actions/helm-rollback-on-cancel
         with:
           release_name: amazing-app
           namespace: gha-ci
-          timeout_minutes: 10
+          previous_revision: ${{ steps.pending.outputs.previous_revision }}
       - name: Check rollback on cancel succeeded
         if: steps.rollback-on-cancel.outcome != 'success'
         uses: actions/github-script@v9
         with:
           script: core.setFailed('Rollback on cancel should succeed.')
+      # Cleanup after "broken" deploy test, so that the next test does not run in a broken state
+      - name: Cleanup for downstream test
+        if: always()
+        run: |
+          helm uninstall amazing-app -n gha-ci --ignore-not-found
 
   test-deploy-gcp-with-rollback:
     needs: [test-deploy-gcp-cancel-rollback]

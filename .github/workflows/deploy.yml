@@ -63,6 +63,10 @@ on:
         description: "Optional Slack channel ID (not name) to post deploy status notifications to. Requires 'secrets: inherit' on the caller workflow and run a '/invite @GitHub Actions' in the Slack channel."
         type: string
         required: false
+      rollback_on_cancel:
+        description: "Whether to roll back the Helm release if the job is canceled during deployment and a pending rollout exists. Default false."
+        type: boolean
+        default: false
     outputs:
       HELM_DEPLOY_STATUS:
         description: "Helm Deploy Status 0: Success, 1: Failed, 2: Rollback, 3: Rollback Failed"
@@ -189,7 +193,7 @@ jobs:
       AZURE_CLUSTER_NAME: ${{ vars.AZURE_CLUSTER_NAME  }}
       AZURE_CLUSTER_RESOURCE_GROUP: ${{ vars.AZURE_CLUSTER_RESOURCE_GROUP }}
     outputs:
-      HELM_DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+      HELM_DEPLOY_STATUS: ${{ steps.helm-rollback-on-cancel.outputs.HELM_DEPLOY_STATUS || steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
       DEPLOY_START_TIME: ${{ steps.record-start.outputs.time }}
       DEPLOY_END_TIME: ${{ steps.record-end.outputs.time }}
     steps:
@@ -302,12 +306,12 @@ jobs:
       # Helm rollback on workflow cancellation and the deployment is not already finished (status 0)
       - id: helm-rollback-on-cancel
         name: Helm rollback on cancellation
-        if: cancelled() && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
-        uses: entur/gha-helm/.github/actions/helm-rollback-on-cancel@feat/rollback-on-workflow-cancel # TODO Change to v1
+        if: cancelled() && inputs.rollback_on_cancel && steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != '0'
+        uses: $/.github/actions/helm-rollback-on-cancel
         with:
           release_name: ${{ env.GHA_HELM_DEPLOY_RELEASE_NAME }}
           namespace: ${{ env.GHA_HELM_DEPLOY_NAMESPACE }}
-          timeout_minutes: ${{ inputs.timeout_minutes }}
+          previous_revision: ${{ steps.helm-deploy.outputs.PREVIOUS_REVISION }}
       - id: record-end
         name: Record deployment end time
         if: always()
@@ -319,7 +323,7 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+          DEPLOY_STATUS: ${{ steps.helm-rollback-on-cancel.outputs.HELM_DEPLOY_STATUS || steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
           REPOSITORY: ${{ github.repository }}
           ENVIRONMENT: ${{ inputs.environment }}
           IMAGE: ${{ inputs.image }}
@@ -346,6 +350,26 @@ jobs:
               EMOJI=":rotating_light:"
               TITLE="CRITICAL — Helm Deploy & Rollback Failed"
               STATUS_TEXT="Deploy Failed, Rollback Also Failed"
+              ;;
+            4)
+              EMOJI=":cancelled:"
+              TITLE="Helm deploy cancelled - rolling back to previous release"
+              STATUS_TEXT="Deploy Cancelled, rolling back to previous release"
+              ;;
+            5)
+              EMOJI=":rotating_light:"
+              TITLE="CRITICAL — Helm Deploy Cancelled & Rollback Failed"
+              STATUS_TEXT="Deploy Cancelled, could not initiate rollback! Please investigate manually."
+              ;;
+            6)
+              EMOJI=":info:"
+              TITLE="Helm Deploy Cancelled - Rollback Skipped"
+              STATUS_TEXT="Deploy Cancelled, but a newer deploy is already in progress — will not roll back"
+              ;;
+            7)
+              EMOJI=":info:"
+              TITLE="Helm Deploy Cancelled - No Previous Revision"
+              STATUS_TEXT="Deploy Cancelled, but no previous release revision exists to roll back to"
               ;;
             *)
               EMOJI=":question:"
