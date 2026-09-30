@@ -13,8 +13,23 @@ jobs:
       environment: dev
       image: amazing-app:latest
       slack_channel_id: GXYZABCD # optional slack channel ID for notifications
-    secrets: inherit # optional - required for slack notifications
+    secrets: # optional - only needed for notifications
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }} # slack notifications
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }} # deployment webhook
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }} # grafana annotations
 ```
+
+`secrets: inherit` also works, but passing only the secrets above is sufficient.
+
+## Secrets
+
+All secrets are optional.
+
+| SECRET | USED FOR |
+|--------|----------|
+| `SLACK_BOT_TOKEN` | Slack notifications (when `slack_channel_id` is set) |
+| `GITDAILIES_WEBHOOK_KEY` | Deployment webhook notification |
+| `GRAFANA_CLOUD_API_TOKEN` | Grafana deployment annotations |
 
 ## Inputs
 

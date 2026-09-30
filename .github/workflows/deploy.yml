@@ -3,6 +3,16 @@ name: Entur/Helm/Deploy
 
 on:
   workflow_call:
+    secrets:
+      SLACK_BOT_TOKEN:
+        description: "Slack bot token, used when slack_channel_id is set. Optional; 'secrets: inherit' also works."
+        required: false
+      GITDAILIES_WEBHOOK_KEY:
+        description: "Key for the deployment webhook notification. Optional; 'secrets: inherit' also works."
+        required: false
+      GRAFANA_CLOUD_API_TOKEN:
+        description: "Grafana Cloud API token for deployment annotations. Optional; 'secrets: inherit' also works."
+        required: false
     inputs:
       image:
         description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config."
@@ -60,7 +70,7 @@ on:
         type: string
         required: false
       slack_channel_id:
-        description: "Optional Slack channel ID (not name) to post deploy status notifications to. Requires 'secrets: inherit' on the caller workflow and run a '/invite @GitHub Actions' in the Slack channel."
+        description: "Optional Slack channel ID (not name) to post deploy status notifications to. Requires the SLACK_BOT_TOKEN secret (or 'secrets: inherit') on the caller workflow and run a '/invite @GitHub Actions' in the Slack channel."
         type: string
         required: false
     outputs:
@@ -141,7 +151,7 @@ jobs:
           blocks: ${{ steps.build-message.outputs.blocks }}
           token: ${{ secrets.SLACK_BOT_TOKEN }}
       # The approval post lives in this separate job, so its silent failures
-      # (bad channel / missing invite / no secrets: inherit) aren't visible to
+      # (bad channel / missing invite / no SLACK_BOT_TOKEN secret) aren't visible to
       # the warning in helm-deploy. post@v3 returns empty message_ts on an API
       # error, so treat a non-success outcome OR an empty ts as not-delivered.
       - name: Warn if approval message was not delivered
@@ -150,7 +160,7 @@ jobs:
           (steps.slack-post.outcome != 'success' || steps.slack-post.outputs.message_ts == '')
         shell: bash
         run: |
-          echo "::warning::Slack approval notification was not delivered — check slack_channel_id, that the workflow is called with 'secrets: inherit', and that the Slack bot is invited to the channel."
+          echo "::warning::Slack approval notification was not delivered — check slack_channel_id, that the caller passes the SLACK_BOT_TOKEN secret (or 'secrets: inherit'), and that the Slack bot is invited to the channel."
   helm-deploy:
     needs: [slack-pending]
     # !cancelled() (not the default success()) is required: slack-pending is
@@ -392,7 +402,7 @@ jobs:
            (steps.slack-notify.outcome == 'success' && steps.slack-notify.outputs.message_ts == ''))
         shell: bash
         run: |
-          echo "::warning::Slack notification failed or was not delivered — check slack_channel_id, that the workflow is called with 'secrets: inherit', and that the Slack bot is invited to the channel."
+          echo "::warning::Slack notification failed or was not delivered — check slack_channel_id, that the caller passes the SLACK_BOT_TOKEN secret (or 'secrets: inherit'), and that the Slack bot is invited to the channel."
       - uses: entur/gha-meta/.github/actions/posthog@v1
         id: send-analytics
         name: Send analytics to PostHog
