@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/entur/gha-helm/compare/v2.0.0...v2.1.0) (2026-10-06)
+
+
+### Features
+
+* Catch helm dependency update errors ([#139](https://github.com/entur/gha-helm/issues/139)) ([d319b1d](https://github.com/entur/gha-helm/commit/d319b1dd2d42b2f887dfca816995cb945e51f0fd))
+
 ## [2.0.0](https://github.com/entur/gha-helm/compare/v1.7.0...v2.0.0) (2026-08-19)
 
 

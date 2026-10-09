@@ -56,7 +56,12 @@ runs:
           echo "::error::Effective timeout is ${TIMEOUT}m — increase timeout_minutes to at least 6"
           exit 1
         fi
-        helm dependency update ./${GHA_HELM_DEPLOY_CHART}
+        if ! DEP_UPDATE_OUTPUT=$(helm dependency update ./${GHA_HELM_DEPLOY_CHART} 2>&1); then
+          echo "${DEP_UPDATE_OUTPUT}"
+          echo "::error::Helm dependency update failed for ./${GHA_HELM_DEPLOY_CHART}"
+          exit 1
+        fi
+        echo "${DEP_UPDATE_OUTPUT}"
         declare -a IMAGE_REPLACE_ARG
         # --- Name-based container image replacement (modifies values.yaml via yq) ---
         if [ -n "${GHA_HELM_DEPLOY_CONTAINER_NAME}" ]; then

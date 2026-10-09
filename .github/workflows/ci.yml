@@ -189,6 +189,30 @@ jobs:
           script: |
             core.setFailed('Rollback did not succeed.')
 
+  test-deploy-gcp-bad-dependency:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: install
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: "v3.20.1"
+      - id: helm-deploy
+        continue-on-error: true
+        uses: ./.github/actions/helm-deploy
+        with:
+          image: na
+          release_name: amazing-app-bad-dependency
+          chart: fixture/helm/amazing-app-bad-dependency
+          namespace: gha-ci
+      - name: Check helm dependency update failure was caught
+        if: steps.helm-deploy.outcome != 'failure' || steps.helm-deploy.outputs.HELM_DEPLOY_STATUS != ''
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            core.setFailed('Expected helm dependency update to fail the step without setting HELM_DEPLOY_STATUS.')
+
   test-deploy-gcp-no-image-update:
     if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
     needs: [test-deploy-gcp-with-rollback]
