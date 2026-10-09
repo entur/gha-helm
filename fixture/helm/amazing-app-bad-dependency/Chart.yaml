@@ -1,0 +1,8 @@
+apiVersion: v2
+name: amazing-app-bad-dependency
+description: A fixture chart with a dependency version that does not exist, used to test that helm dependency update failures are caught
+version: 0.0.1
+dependencies:
+  - name: common
+    version: 999.999.999
+    repository: "https://entur.github.io/helm-charts"
