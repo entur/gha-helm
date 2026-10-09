@@ -275,7 +275,7 @@ jobs:
         with:
           version: "v3.20.1"
       - id: login-azure
-        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        uses: Azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -295,7 +295,7 @@ jobs:
           use-kubelogin: true
       - id: clean
         run: |
-          helm uninstall amazing-app -n ghaci
+          helm uninstall amazing-app -n ghaci --ignore-not-found
   update-lint-doc:
     # run only if all deploy tests are successful, but ignore rollback failure
     if: (success() || failure()) && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success' && needs.test-deploy-ok-gcp-multi.result == 'success' && needs.test-deploy-ok-gcp-containers.result == 'success'
