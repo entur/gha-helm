@@ -57,7 +57,10 @@ jobs:
       release_name: amazing-app-multi
       namespace: gha-ci
       image_set_path: "multi-1.container.image,multi-2.container.image"
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
 
   cleanup-deploy-gcp-multi:
     if: always() && needs.test-deploy-ok-gcp-multi.result != 'skipped'
@@ -95,7 +98,10 @@ jobs:
       release_name: amazing-app-containers
       namespace: gha-ci
       container_name: "app"
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
 
   cleanup-deploy-gcp-containers:
     if: always() && needs.test-deploy-ok-gcp-containers.result != 'skipped'
@@ -133,7 +139,10 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
       slack_channel_id: GFBL95A0J # sandbox-channel
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
 
   test-deploy-gcp-with-rollback:
     needs: [test-deploy-ok-gcp]
@@ -218,7 +227,10 @@ jobs:
       release_name: amazing-app
       namespace: gha-ci
       timeout_minutes: 8
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
 
   cleanup-deploy-gcp:
     # run regardless of previous job status
@@ -260,7 +272,10 @@ jobs:
       chart: fixture/helm/amazing-app-az
       release_name: amazing-app
       namespace: ghaci
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GITDAILIES_WEBHOOK_KEY: ${{ secrets.GITDAILIES_WEBHOOK_KEY }}
+      GRAFANA_CLOUD_API_TOKEN: ${{ secrets.GRAFANA_CLOUD_API_TOKEN }}
   cleanup-deploy-azure:
     if: always() && needs.test-deploy-ok-azure.result != 'skipped'
     needs: [test-deploy-ok-azure]
