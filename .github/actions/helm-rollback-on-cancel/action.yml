@@ -10,10 +10,15 @@ inputs:
   timeout_minutes:
     description: "Job timeout in minutes (default same value as helm-deploy)."
     required: true
+outputs:
+  ROLLBACK_STATUS:
+    description: "Outcome of the cancellation rollback: rolled_back, no_pending_rollout, query_failed, or rollback_failed."
+    value: ${{ steps.rollback.outputs.ROLLBACK_STATUS }}
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - id: rollback
+      shell: bash
       env:
         TIMEOUT: ${{ inputs.timeout_minutes }}
         RELEASE_NAME: ${{ inputs.release_name }}
@@ -22,7 +27,14 @@ runs:
         TIMEOUT=$((TIMEOUT/2-2))
         if (( TIMEOUT < 1 )); then TIMEOUT=1; fi
         if (( TIMEOUT > 4 )); then TIMEOUT=4; fi
-        if helm list --pending -n "${NAMESPACE}" --filter "^${RELEASE_NAME}$" --short | grep -q .; then
+        if ! PENDING=$(helm list --pending -n "${NAMESPACE}" --filter "^${RELEASE_NAME}$" --short); then
+          echo "#################################################################################################"
+          echo " Failed to query Helm for pending rollouts of '${RELEASE_NAME}'. Please investigate manually."
+          echo "#################################################################################################"
+          echo "ROLLBACK_STATUS=query_failed" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+        if [[ -n "${PENDING}" ]]; then
           echo "#################################################################################################"
           echo " Job cancelled. Rolling back Helm release '${RELEASE_NAME}'..."
           echo "#################################################################################################"
@@ -30,12 +42,15 @@ runs:
             echo "#################################################################################################"
             echo " Helm rollback on cancellation successful."
             echo "#################################################################################################"
+            echo "ROLLBACK_STATUS=rolled_back" >> "$GITHUB_OUTPUT"
           else
             echo "#################################################################################################"
             echo " Helm rollback on cancellation failed. Please investigate manually."
             echo "#################################################################################################"
+            echo "ROLLBACK_STATUS=rollback_failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
         else
           echo "No active rollout found for '${RELEASE_NAME}' in '${NAMESPACE}'. Nothing to roll back."
+          echo "ROLLBACK_STATUS=no_pending_rollout" >> "$GITHUB_OUTPUT"
         fi

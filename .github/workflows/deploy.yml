@@ -320,6 +320,7 @@ jobs:
         shell: bash
         env:
           DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
+          CANCEL_ROLLBACK_STATUS: ${{ steps.helm-rollback-on-cancel.outputs.ROLLBACK_STATUS }}
           REPOSITORY: ${{ github.repository }}
           ENVIRONMENT: ${{ inputs.environment }}
           IMAGE: ${{ inputs.image }}
@@ -348,9 +349,28 @@ jobs:
               STATUS_TEXT="Deploy Failed, Rollback Also Failed"
               ;;
             *)
-              EMOJI=":question:"
-              TITLE="Helm Deploy Status Unknown"
-              STATUS_TEXT="Unknown (status: ${DEPLOY_STATUS:-empty})"
+              case "${CANCEL_ROLLBACK_STATUS}" in
+                rolled_back)
+                  EMOJI=":warning:"
+                  TITLE="Helm Deploy Cancelled — Rolled Back"
+                  STATUS_TEXT="Deploy Cancelled, Rollback Succeeded"
+                  ;;
+                query_failed|rollback_failed)
+                  EMOJI=":rotating_light:"
+                  TITLE="CRITICAL — Helm Deploy Cancelled, Rollback Failed"
+                  STATUS_TEXT="Deploy Cancelled, Rollback Failed — Please investigate manually"
+                  ;;
+                no_pending_rollout)
+                  EMOJI=":warning:"
+                  TITLE="Helm Deploy Cancelled"
+                  STATUS_TEXT="Deploy Cancelled, No Pending Rollout to Roll Back"
+                  ;;
+                *)
+                  EMOJI=":question:"
+                  TITLE="Helm Deploy Status Unknown"
+                  STATUS_TEXT="Unknown (status: ${DEPLOY_STATUS:-empty})"
+                  ;;
+              esac
               ;;
           esac
 
