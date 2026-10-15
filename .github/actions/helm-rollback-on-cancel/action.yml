@@ -24,6 +24,10 @@ runs:
         NAMESPACE: ${{ inputs.namespace }}
         PREVIOUS_REVISION: ${{ inputs.previous_revision }}
       run: |
+        if [[ ! "${PREVIOUS_REVISION}" =~ ^[0-9]+$ ]]; then
+          echo "::error::previous_revision must be a number, got '${PREVIOUS_REVISION}'. Rollback will not be attempted"
+          exit 1
+        fi
         STATUS_JSON=$(helm status "${RELEASE_NAME}" --namespace "${NAMESPACE}" -o json 2>/dev/null) || true
         CURRENT_STATUS=$(jq -r '.info.status // empty' <<< "${STATUS_JSON}")
         CURRENT_REVISION=$(jq -r '.version // 0' <<< "${STATUS_JSON}")
