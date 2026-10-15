@@ -1,0 +1,53 @@
+name: Entur/Helm/Rollback-On-Cancel
+description: Rolls back the Helm release if the job is canceled during deployment and a pending rollout exists
+inputs:
+  release_name:
+    description: "The release name"
+    required: true
+  namespace:
+    description: "The Kubernetes namespace"
+    required: true
+  previous_revision:
+    description: "The release revision before this deploy started (0 if the release did not exist). Output PREVIOUS_REVISION from helm-deploy."
+    required: true
+outputs:
+  HELM_DEPLOY_STATUS:
+    description: "4: Rollback initiated, 5: Rollback failed, 6: Skipped, newer deploy, 7: Skipped, no previous revision. Empty if there was no active rollout."
+    value: ${{ steps.rollback.outputs.HELM_DEPLOY_STATUS }}
+runs:
+  using: "composite"
+  steps:
+    - id: rollback
+      shell: bash
+      env:
+        RELEASE_NAME: ${{ inputs.release_name }}
+        NAMESPACE: ${{ inputs.namespace }}
+        PREVIOUS_REVISION: ${{ inputs.previous_revision }}
+      run: |
+        if [[ ! "${PREVIOUS_REVISION}" =~ ^[0-9]+$ ]]; then
+          echo "::error::previous_revision must be a number, got '${PREVIOUS_REVISION}'. Rollback will not be attempted"
+          exit 1
+        fi
+        STATUS_JSON=$(helm status "${RELEASE_NAME}" --namespace "${NAMESPACE}" -o json 2>/dev/null) || true
+        CURRENT_STATUS=$(jq -r '.info.status // empty' <<< "${STATUS_JSON}")
+        CURRENT_REVISION=$(jq -r '.version // 0' <<< "${STATUS_JSON}")
+
+        if [[ "${CURRENT_STATUS}" != pending-* ]]; then
+          echo "No active rollout found for '${RELEASE_NAME}' in '${NAMESPACE}'. Nothing to roll back."
+        elif (( CURRENT_REVISION != PREVIOUS_REVISION + 1 )); then
+          # Not the revision this run created, so a newer deploy took over - don't revert it
+          echo "::warning::Pending revision ${CURRENT_REVISION} is not the one created by this run (expected $((PREVIOUS_REVISION + 1))). Skipping rollback to avoid reverting a newer deploy."
+          echo "HELM_DEPLOY_STATUS=6" >> "$GITHUB_OUTPUT"
+        elif (( PREVIOUS_REVISION < 1 )); then
+          echo "Release '${RELEASE_NAME}' had no revision before this deploy. Nothing to roll back to."
+          echo "HELM_DEPLOY_STATUS=7" >> "$GITHUB_OUTPUT"
+        else
+          echo "Job cancelled. Rolling back '${RELEASE_NAME}' to revision ${PREVIOUS_REVISION}..."
+          if helm rollback "${RELEASE_NAME}" "${PREVIOUS_REVISION}" --namespace "${NAMESPACE}" --debug; then
+            echo "HELM_DEPLOY_STATUS=4" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Helm rollback on cancellation failed. Please investigate manually."
+            echo "HELM_DEPLOY_STATUS=5" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+        fi
