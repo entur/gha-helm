@@ -39,6 +39,7 @@ README-unittest.md            # Unit test workflow docs (auto-generated sections
 - **Container name deploy**: `container_name` resolves a container by name in `common.containers` array, avoiding fragile array indices.
 - **Slack notifications**: Optional via `slack_channel_id` input, includes approval gate detection and deploy result messages.
 - **Image skip**: Setting `image: na` skips image replacement in Helm values.
+- **Keep image**: Setting `image: current` reads the image(s) at `image_set_path` from the release (`helm get values`) and sets them again, for helm-only changes. The release must be `deployed`. Not supported with `container_name`.
 - **Analytics**: Workflows send usage data to PostHog via `entur/gha-meta/.github/actions/posthog`.
 
 ## Development workflow
@@ -59,8 +60,9 @@ There are no local tests. All testing happens in CI (`ci.yml`) which:
 3. Deploys fixture charts to real dev clusters (GCP and Azure)
 4. Tests rollback by deploying a bad image
 5. Tests `image: na` (skip image update)
-6. Tests `container_name` (name-based image replacement)
-7. Cleans up test releases after each test
+6. Tests `image: current` (keep the running image, fail without a release)
+7. Tests `container_name` (name-based image replacement)
+8. Cleans up test releases after each test
 
 To test changes: open a PR and let CI run. The CI deploys to actual Kubernetes clusters.
 
