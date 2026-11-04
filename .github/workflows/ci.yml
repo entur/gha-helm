@@ -204,9 +204,75 @@ jobs:
           script: |
             core.setFailed('Expected helm dependency update to fail the step without setting HELM_DEPLOY_STATUS.')
 
-  test-deploy-gcp-no-image-update:
+  test-deploy-gcp-current-image:
     if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
     needs: [test-deploy-gcp-with-rollback]
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: install
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: "v3.20.1"
+      - id: cloud-auth
+        uses: entur/gha-meta/.github/actions/cloud-auth@v1
+        with:
+          environment: dev
+          gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
+      - uses: entur/gha-meta/.github/actions/k8s-auth@v1
+        with:
+          environment: dev
+      - id: helm-deploy-missing
+        continue-on-error: true
+        uses: ./.github/actions/helm-deploy
+        with:
+          timeout_minutes: 6
+          image: current
+          release_name: amazing-app-not-deployed
+          chart: fixture/helm/amazing-app
+          values: values-kub-ent-dev.yaml
+          namespace: gha-ci
+      - name: Check that current fails without a release, before helm upgrade
+        if: steps.helm-deploy-missing.outcome != 'failure' || steps.helm-deploy-missing.outputs.HELM_DEPLOY_STATUS != ''
+        run: |
+          echo "::error::image 'current' should fail before helm upgrade when the release does not exist"
+          exit 1
+      - id: before
+        run: |
+          {
+            echo "image=$(helm get values amazing-app -n gha-ci -o json | jq -r .common.container.image)"
+            echo "revision=$(helm status amazing-app -n gha-ci -o json | jq -r .version)"
+          } >> "$GITHUB_OUTPUT"
+      - id: helm-deploy
+        uses: ./.github/actions/helm-deploy
+        with:
+          timeout_minutes: 6
+          image: current
+          release_name: amazing-app
+          chart: fixture/helm/amazing-app
+          values: values-kub-ent-dev.yaml
+          namespace: gha-ci
+      - name: Check that a new revision kept the image
+        env:
+          BEFORE_IMAGE: ${{ steps.before.outputs.image }}
+          BEFORE_REVISION: ${{ steps.before.outputs.revision }}
+        run: |
+          image=$(helm get values amazing-app -n gha-ci -o json | jq -r .common.container.image)
+          revision=$(helm status amazing-app -n gha-ci -o json | jq -r .version)
+          if [ "${image}" != "${BEFORE_IMAGE}" ] || [ "${revision}" -le "${BEFORE_REVISION}" ]; then
+            echo "::error::expected a new revision with image '${BEFORE_IMAGE}' (revision > ${BEFORE_REVISION}), got '${image}' (revision ${revision})"
+            exit 1
+          fi
+
+  test-deploy-gcp-no-image-update:
+    if: (success() || failure()) && needs.test-deploy-gcp-with-rollback.result == 'success'
+    needs: [test-deploy-gcp-with-rollback, test-deploy-gcp-current-image]
     uses: ./.github/workflows/deploy.yml
     concurrency:
       group: ${{ github.head_ref }}-gcp
@@ -243,6 +309,7 @@ jobs:
       - id: clean
         run: |
           helm uninstall amazing-app -n gha-ci --ignore-not-found
+          helm uninstall amazing-app-not-deployed -n gha-ci --ignore-not-found
 
   test-deploy-ok-azure:
     needs: [test-lint-ok-azure]
@@ -298,7 +365,7 @@ jobs:
           helm uninstall amazing-app -n ghaci --ignore-not-found
   update-lint-doc:
     # run only if all deploy tests are successful, but ignore rollback failure
-    if: (success() || failure()) && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success' && needs.test-deploy-ok-gcp-multi.result == 'success' && needs.test-deploy-ok-gcp-containers.result == 'success'
+    if: (success() || failure()) && needs.test-deploy-gcp-current-image.result == 'success' && needs.test-deploy-gcp-no-image-update.result == 'success' && needs.test-deploy-ok-azure.result == 'success' && needs.test-deploy-ok-gcp-multi.result == 'success' && needs.test-deploy-ok-gcp-containers.result == 'success'
     needs:
       [
         cleanup-deploy-azure,
@@ -306,6 +373,7 @@ jobs:
         cleanup-deploy-gcp-multi,
         cleanup-deploy-gcp-containers,
         test-deploy-ok-azure,
+        test-deploy-gcp-current-image,
         test-deploy-gcp-no-image-update,
         test-deploy-ok-gcp-multi,
         test-deploy-ok-gcp-containers,
