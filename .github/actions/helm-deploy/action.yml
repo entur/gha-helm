@@ -9,7 +9,7 @@ inputs:
     description: "The chart, defaults to `helm/$repository_name`"
     default: "repo_name"
   image:
-    description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config."
+    description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config. Use `current` to keep the image the release runs now (e.g. for a helm-only change)."
     required: true
   release_name:
     description: "The release name, defaults to repository name"
@@ -65,7 +65,7 @@ runs:
         declare -a IMAGE_REPLACE_ARG
         # --- Name-based container image replacement (modifies values.yaml via yq) ---
         if [ -n "${GHA_HELM_DEPLOY_CONTAINER_NAME}" ]; then
-          if [ "${GHA_HELM_DEPLOY_IMAGE}" == "na" ] || [ -z "${GHA_HELM_DEPLOY_IMAGE}" ]; then
+          if [ "${GHA_HELM_DEPLOY_IMAGE}" == "na" ] || [ "${GHA_HELM_DEPLOY_IMAGE}" == "current" ] || [ -z "${GHA_HELM_DEPLOY_IMAGE}" ]; then
             echo "::error::container_name requires a valid 'image' input, but got '${GHA_HELM_DEPLOY_IMAGE}'."
             exit 1
           fi
@@ -112,7 +112,20 @@ runs:
         # --- Path-based image replacement via --set (skipped when using default with container_name) ---
         if [ "${GHA_HELM_DEPLOY_IMAGE}" != "na" ]; then
           if [ -z "${GHA_HELM_DEPLOY_CONTAINER_NAME}" ] || [ "${GHA_HELM_DEPLOY_IMAGE_SET_PATH}" != "common.container.image" ]; then
-            echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
+            if [ "${GHA_HELM_DEPLOY_IMAGE}" == "current" ]; then
+              # A failed or pending revision may hold an image that never ran.
+              if ! RELEASE_STATUS=$(helm status "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" -o json | jq -r .info.status); then
+                echo "::error::image 'current' could not read release '${GHA_HELM_DEPLOY_RELEASE_NAME}' in namespace '${GHA_HELM_DEPLOY_NAMESPACE}'. If it does not exist, deploy an image tag first."
+                exit 1
+              fi
+              if [ "${RELEASE_STATUS}" != "deployed" ]; then
+                echo "::error::image 'current' needs release '${GHA_HELM_DEPLOY_RELEASE_NAME}' to be deployed, but it is '${RELEASE_STATUS}'. Deploy an image tag instead."
+                exit 1
+              fi
+              CURRENT_VALUES=$(helm get values "${GHA_HELM_DEPLOY_RELEASE_NAME}" --namespace "${GHA_HELM_DEPLOY_NAMESPACE}" -o json)
+            else
+              echo "Setting new image: ${GHA_HELM_DEPLOY_IMAGE}"
+            fi
             IFS=',' read -ra PATHS <<< "${GHA_HELM_DEPLOY_IMAGE_SET_PATH}"
             for path in "${PATHS[@]}"; do
               path=$(echo "${path}" | xargs) # trim whitespace
@@ -120,7 +133,18 @@ runs:
                 echo "::error::Invalid image_set_path value: ${path}"
                 exit 1
               fi
-              IMAGE_REPLACE_ARG+=("--set" "${path}=${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}")
+              if [ "${GHA_HELM_DEPLOY_IMAGE}" == "current" ]; then
+                FULL_IMAGE=$(jq -r --arg p "${path}" 'getpath($p | split(".")) | strings' <<< "${CURRENT_VALUES}" || true)
+                # Rejects a missing value and anything unsafe for --set.
+                if [[ ! "${FULL_IMAGE}" =~ ^[A-Za-z0-9._/:@-]+$ ]]; then
+                  echo "::error::Release '${GHA_HELM_DEPLOY_RELEASE_NAME}' has no image at ${path} (got '${FULL_IMAGE}'). Deploy an image tag instead."
+                  exit 1
+                fi
+                echo "::notice::Keeping current image at ${path}: ${FULL_IMAGE}"
+              else
+                FULL_IMAGE="${GHA_HELM_DEPLOY_REGISTRY}/${GHA_HELM_DEPLOY_IMAGE}"
+              fi
+              IMAGE_REPLACE_ARG+=("--set" "${path}=${FULL_IMAGE}")
             done
           fi
         fi
