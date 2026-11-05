@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       image:
-        description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config."
+        description: "The image to deploy, on the form app:tag. Use `na` value to skip replacing the image version in the helm config. Use `current` to keep the image the release runs now (e.g. for a helm-only change)."
         required: true
         type: string
       cloud_provider:
@@ -434,9 +434,9 @@ jobs:
           esac
           echo "environment=${mapped}" >> "$GITHUB_OUTPUT"
 
-          # Use the deployed image (name:tag) as the annotation text, unless image
-          # replacement was skipped (image: na), in which case identify by commit.
-          if [[ "$IMAGE" == "na" || -z "$IMAGE" ]]; then
+          # Use the deployed image (name:tag) as the annotation text, unless no
+          # new image was given (image: na or current), in which case identify by commit.
+          if [[ "$IMAGE" == "na" || "$IMAGE" == "current" || -z "$IMAGE" ]]; then
             echo "annotation_text=deployment of ${REPOSITORY}:${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
           else
             echo "annotation_text=${IMAGE}" >> "$GITHUB_OUTPUT"
