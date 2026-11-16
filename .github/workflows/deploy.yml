@@ -192,6 +192,7 @@ jobs:
       HELM_DEPLOY_STATUS: ${{ steps.helm-deploy.outputs.HELM_DEPLOY_STATUS }}
       DEPLOY_START_TIME: ${{ steps.record-start.outputs.time }}
       DEPLOY_END_TIME: ${{ steps.record-end.outputs.time }}
+      OWNING_TEAM: ${{ steps.derive-owner.outputs.OWNING_TEAM }}
     steps:
       # This job only starts once the environment approval gate (if any) has
       # been passed, so reaching this step means the deployment was approved.
@@ -259,6 +260,21 @@ jobs:
         if: env.GHA_GIT_REF != ''
         with:
           ref: ${{ env.GHA_GIT_REF }}
+      - id: derive-owner
+        name: Derive owning team from .entur manifest
+        continue-on-error: true
+        shell: bash
+        run: |
+          # Best-effort team tag for the Grafana deploy annotation.
+          owner=""
+          for manifest in .entur/*.yaml .entur/*.yml; do
+            [[ -f "$manifest" ]] || continue
+            owner="$(yq eval 'select(.kind == "GoogleCloudApplication") | .metadata.owner // ""' "$manifest" 2>/dev/null | head -n1 || true)"
+            [[ -n "$owner" && "$owner" != "null" ]] && break
+            owner=""
+          done
+          echo "Derived owning team: '${owner}'"
+          echo "OWNING_TEAM=${owner}" >> "$GITHUB_OUTPUT"
       - id: install
         uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
@@ -455,6 +471,8 @@ jobs:
           commit-sha: ${{ github.sha }}
           environment: ${{ steps.prepare.outputs.environment }}
           grafana-annotation-text: ${{ steps.prepare.outputs.annotation_text }}
-          grafana-annotation-tags: ${{ inputs.cloud_provider }}
+          grafana-annotation-tags: >-
+            ${{ inputs.cloud_provider }}
+            ${{ needs.helm-deploy.outputs.OWNING_TEAM }}
           deployment-start-time: ${{ needs.helm-deploy.outputs.DEPLOY_START_TIME }}
           deployment-end-time: ${{ needs.helm-deploy.outputs.DEPLOY_END_TIME }}
