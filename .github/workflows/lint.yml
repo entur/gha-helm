@@ -40,6 +40,4 @@ jobs:
         if: always()
         with:
           api_key:         ${{ vars.POSTHOG_API_TOKEN_PLATTFORM }}
-          gha_repository:  entur/gha-helm # This must be hardcoded to the repository where the workflow is defined.
           workflow_inputs: ${{ toJSON(inputs) }}
-          workflow_name:   helm-lint
