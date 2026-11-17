@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/entur/gha-helm/compare/v2.1.0...v2.1.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **ETU-80372:** Remove posthog inputs that are no longer needed ([#147](https://github.com/entur/gha-helm/issues/147)) ([#148](https://github.com/entur/gha-helm/issues/148)) ([492e87d](https://github.com/entur/gha-helm/commit/492e87de94f732def12873740361fb7d0409978a))
+
 ## [2.1.0](https://github.com/entur/gha-helm/compare/v2.0.0...v2.1.0) (2026-10-06)
 
 
