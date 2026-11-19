@@ -11,8 +11,9 @@ See [entur/ai AGENTS.md](https://github.com/entur/ai/blob/main/AGENTS.md) for co
 ```
 .github/
   actions/
-    helm-lint/action.yml      # Composite action: helm dependency update + lint
-    helm-deploy/action.yml    # Composite action: helm upgrade --install with rollback
+    helm-lint/action.yml               # Composite action: helm dependency update + lint
+    helm-deploy/action.yml             # Composite action: helm upgrade --install with rollback
+    helm-rollback-on-cancel/action.yml # Composite action: rollback on workflow cancellation
   workflows/
     lint.yml                  # Reusable workflow: Helm lint (user-facing)
     deploy.yml                # Reusable workflow: Helm deploy (user-facing)
